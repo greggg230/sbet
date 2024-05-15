@@ -1,10 +1,10 @@
 from dataclasses import dataclass
-from .nba_game import NbaGame
+from sbet.data.models import NbaGame
 
 
 @dataclass(frozen=True)
 class NbaMoneyLineBettingOpportunity:
     game: NbaGame
     book_name: str
-    away_odds: float
-    home_odds: float
+    bet_on_home_team: bool
+    price: float

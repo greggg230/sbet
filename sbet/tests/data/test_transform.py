@@ -64,17 +64,31 @@ class TestTransform(unittest.TestCase):
 
         self.assertIsInstance(opportunities, List)
         self.assertTrue(all(isinstance(opportunity, NbaMoneyLineBettingOpportunity) for opportunity in opportunities))
-        self.assertEqual(len(opportunities), 2)
+        self.assertEqual(len(opportunities), 4)  # 2 games x 2 opportunities per game
 
+        # First game, home bet
         self.assertEqual(opportunities[0].game.game_id, 20800741)
         self.assertEqual(opportunities[0].book_name, 'Book1')
-        self.assertEqual(opportunities[0].away_odds, 150.0)
-        self.assertEqual(opportunities[0].home_odds, -150.0)
+        self.assertTrue(opportunities[0].bet_on_home_team)
+        self.assertEqual(opportunities[0].price, -150.0)
 
-        self.assertEqual(opportunities[1].game.game_id, 20800701)
-        self.assertEqual(opportunities[1].book_name, 'Book2')
-        self.assertEqual(opportunities[1].away_odds, 200.0)
-        self.assertEqual(opportunities[1].home_odds, -200.0)
+        # First game, away bet
+        self.assertEqual(opportunities[1].game.game_id, 20800741)
+        self.assertEqual(opportunities[1].book_name, 'Book1')
+        self.assertFalse(opportunities[1].bet_on_home_team)
+        self.assertEqual(opportunities[1].price, 150.0)
+
+        # Second game, home bet
+        self.assertEqual(opportunities[2].game.game_id, 20800701)
+        self.assertEqual(opportunities[2].book_name, 'Book2')
+        self.assertTrue(opportunities[2].bet_on_home_team)
+        self.assertEqual(opportunities[2].price, -200.0)
+
+        # Second game, away bet
+        self.assertEqual(opportunities[3].game.game_id, 20800701)
+        self.assertEqual(opportunities[3].book_name, 'Book2')
+        self.assertFalse(opportunities[3].bet_on_home_team)
+        self.assertEqual(opportunities[3].price, 200.0)
 
     def test_transform_to_nba_money_line_betting_opportunities_missing_game(self):
         nba_games = transform_to_nba_games(self.games, self.teams)
@@ -87,4 +101,3 @@ class TestTransform(unittest.TestCase):
             transform_to_nba_money_line_betting_opportunities(invalid_betting_odds, nba_games)
 
         self.assertEqual(str(context.exception), "Game ID 99999999 not found in game data.")
-

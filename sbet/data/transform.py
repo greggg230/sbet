@@ -39,12 +39,20 @@ def transform_to_nba_money_line_betting_opportunities(
         if game is None:
             raise ValueError(f"Game ID {odds.game_id} not found in game data.")
 
-        opportunity = NbaMoneyLineBettingOpportunity(
+        opportunity_home = NbaMoneyLineBettingOpportunity(
             game=game,
             book_name=odds.book_name,
-            away_odds=odds.price1,
-            home_odds=odds.price2
+            bet_on_home_team=True,
+            price=odds.price2
         )
-        opportunities.append(opportunity)
+        opportunities.append(opportunity_home)
+
+        opportunity_away = NbaMoneyLineBettingOpportunity(
+            game=game,
+            book_name=odds.book_name,
+            bet_on_home_team=False,
+            price=odds.price1
+        )
+        opportunities.append(opportunity_away)
 
     return opportunities
