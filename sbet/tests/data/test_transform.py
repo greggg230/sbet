@@ -1,7 +1,7 @@
 import unittest
-from sbet.data.models import NbaGame, NbaTeam
-from sbet.data.models.csv_models import Team, Game
-from sbet.data.transform import transform_to_nba_games
+from sbet.data.models import NbaGame, NbaTeam, NbaMoneyLineBettingOpportunity
+from sbet.data.models.csv_models import Team, Game, MoneyLineBettingOdds
+from sbet.data.transform import transform_to_nba_games, transform_to_nba_money_line_betting_opportunities
 from typing import List
 
 
@@ -30,6 +30,13 @@ class TestTransform(unittest.TestCase):
                  season='2008-09')
         ]
 
+        self.money_line_betting_odds: List[MoneyLineBettingOdds] = [
+            MoneyLineBettingOdds(game_id=20800741, book_name='Book1', book_id=1, team_id=1610612737,
+                                 a_team_id=1610612738, price1=150.0, price2=-150.0),
+            MoneyLineBettingOdds(game_id=20800701, book_name='Book2', book_id=2, team_id=1610612738,
+                                 a_team_id=1610612737, price1=200.0, price2=-200.0)
+        ]
+
     def test_transform_to_nba_games(self):
         nba_games = transform_to_nba_games(self.games, self.teams)
 
@@ -50,3 +57,34 @@ class TestTransform(unittest.TestCase):
         self.assertEqual(nba_games[1].game_type, 'Regular Season')
         self.assertEqual(nba_games[1].home_team, NbaTeam.BOS)
         self.assertEqual(nba_games[1].away_team, NbaTeam.ATL)
+
+    def test_transform_to_nba_money_line_betting_opportunities(self):
+        nba_games = transform_to_nba_games(self.games, self.teams)
+        opportunities = transform_to_nba_money_line_betting_opportunities(self.money_line_betting_odds, nba_games)
+
+        self.assertIsInstance(opportunities, List)
+        self.assertTrue(all(isinstance(opportunity, NbaMoneyLineBettingOpportunity) for opportunity in opportunities))
+        self.assertEqual(len(opportunities), 2)
+
+        self.assertEqual(opportunities[0].game.game_id, 20800741)
+        self.assertEqual(opportunities[0].book_name, 'Book1')
+        self.assertEqual(opportunities[0].away_odds, 150.0)
+        self.assertEqual(opportunities[0].home_odds, -150.0)
+
+        self.assertEqual(opportunities[1].game.game_id, 20800701)
+        self.assertEqual(opportunities[1].book_name, 'Book2')
+        self.assertEqual(opportunities[1].away_odds, 200.0)
+        self.assertEqual(opportunities[1].home_odds, -200.0)
+
+    def test_transform_to_nba_money_line_betting_opportunities_missing_game(self):
+        nba_games = transform_to_nba_games(self.games, self.teams)
+        invalid_betting_odds = [
+            MoneyLineBettingOdds(game_id=99999999, book_name='Book3', book_id=3, team_id=1610612738,
+                                 a_team_id=1610612737, price1=100.0, price2=-100.0)
+        ]
+
+        with self.assertRaises(ValueError) as context:
+            transform_to_nba_money_line_betting_opportunities(invalid_betting_odds, nba_games)
+
+        self.assertEqual(str(context.exception), "Game ID 99999999 not found in game data.")
+

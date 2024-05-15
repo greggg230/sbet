@@ -1,10 +1,9 @@
 from typing import List, Dict
-from sbet.data.models import NbaGame, NbaTeam
-from sbet.data.models.csv_models import Game, Team
+from sbet.data.models import NbaGame, NbaMoneyLineBettingOpportunity, NbaTeam
+from sbet.data.models.csv_models import Game, Team, MoneyLineBettingOdds
 
 
 def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame]:
-    # Create a mapping from team_id to team abbreviation
     team_id_to_abbreviation: Dict[int, str] = {team.team_id: team.abbreviation for team in teams}
 
     nba_games = []
@@ -26,3 +25,26 @@ def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame
             nba_games.append(nba_game)
 
     return nba_games
+
+
+def transform_to_nba_money_line_betting_opportunities(
+        money_line_betting_odds: List[MoneyLineBettingOdds],
+        nba_games: List[NbaGame]
+) -> List[NbaMoneyLineBettingOpportunity]:
+    game_id_to_nba_game: Dict[int, NbaGame] = {game.game_id: game for game in nba_games}
+
+    opportunities = []
+    for odds in money_line_betting_odds:
+        game = game_id_to_nba_game.get(odds.game_id)
+        if game is None:
+            raise ValueError(f"Game ID {odds.game_id} not found in game data.")
+
+        opportunity = NbaMoneyLineBettingOpportunity(
+            game=game,
+            book_name=odds.book_name,
+            away_odds=odds.price1,
+            home_odds=odds.price2
+        )
+        opportunities.append(opportunity)
+
+    return opportunities
