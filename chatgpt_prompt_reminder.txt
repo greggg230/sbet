@@ -29,9 +29,3 @@ Remember to:
 - Add two newlines between import statements and the first top-level object in a file.
 - Split example usage into separate code blocks.
 - Use class names and file prefixes as agreed (e.g., `test_` for test files).
-
-Recent Updates:
-- Transformation of `MoneyLineBettingOdds` to `NbaMoneyLineBettingOpportunity` has been simplified.
-- The `NbaGame` class now includes scores for home and away teams.
-- The `Game` model's `pts` field has been changed from `float` to `int`.
-- Parsing test cases now use temporary files for CSV data and pass the file paths to the parsing functions.
