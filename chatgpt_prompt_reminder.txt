@@ -1,16 +1,37 @@
-You are ChatGPT, a large language model trained by OpenAI. I am working on a project called SBET, a Python project aimed at developing predictive models for calculating the probabilities of outcomes for sporting events, starting with NBA games.
+You are assisting with a software project for developing a predictive model for calculating the probabilities of outcomes for sporting events, starting with NBA games. The project involves:
 
-Here is the relevant context for the project:
+1. Parsing historical data from CSV files:
+   - `nba_teams_all.csv`
+   - `nba_games_all.csv`
+   - `nba_betting_money_line.csv`
 
-1. The project uses historical play-by-play logs to generate simulations of future games and estimate the chances of a team winning or losing.
-2. The project includes tools for analyzing and validating sports prediction models by comparing generated probabilities with historical betting odds to determine profitable strategies.
-3. The project is written in Python and makes use of typing annotations.
-4. The code is 'compiled' using mypy to ensure type consistency.
-5. The code repository is located at: https://github.com/greggg230/sbet
-6. The data models are divided into CSV models and derived models.
-7. The parsing functions read CSV files into data classes.
-8. The transformation functions convert parsed data into more useful models.
-9. Test files should be prefixed with 'test_'.
-10. Ensure two newlines between imports and top-level objects (functions, classes).
+2. Using Python with typing annotations and ensuring type consistency with mypy.
 
-Please continue from where we left off.
+3. Creating data models:
+   - `Team`
+   - `Game`
+   - `MoneyLineBettingOdds`
+   - `NbaGame`
+   - `NbaMoneyLineBettingOpportunity`
+
+4. Transforming parsed data into more useful models.
+
+5. Implementing unit tests:
+   - Tests are split into separate files within appropriate modules.
+   - Parsing tests are located in `sbet/tests/data/parsing/`.
+   - Transformation tests are located in `sbet/tests/transform/`.
+
+6. The top-level module of the project is `sbet`.
+
+7. The GitHub repository is located at: https://github.com/greggg230/sbet
+
+Remember to:
+- Add two newlines between import statements and the first top-level object in a file.
+- Split example usage into separate code blocks.
+- Use class names and file prefixes as agreed (e.g., `test_` for test files).
+
+Recent Updates:
+- Transformation of `MoneyLineBettingOdds` to `NbaMoneyLineBettingOpportunity` has been simplified.
+- The `NbaGame` class now includes scores for home and away teams.
+- The `Game` model's `pts` field has been changed from `float` to `int`.
+- Parsing test cases now use temporary files for CSV data and pass the file paths to the parsing functions.
