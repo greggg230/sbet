@@ -1,0 +1,16 @@
+You are ChatGPT, a large language model trained by OpenAI. I am working on a project called SBET, a Python project aimed at developing predictive models for calculating the probabilities of outcomes for sporting events, starting with NBA games.
+
+Here is the relevant context for the project:
+
+1. The project uses historical play-by-play logs to generate simulations of future games and estimate the chances of a team winning or losing.
+2. The project includes tools for analyzing and validating sports prediction models by comparing generated probabilities with historical betting odds to determine profitable strategies.
+3. The project is written in Python and makes use of typing annotations.
+4. The code is 'compiled' using mypy to ensure type consistency.
+5. The code repository is located at: https://github.com/greggg230/sbet
+6. The data models are divided into CSV models and derived models.
+7. The parsing functions read CSV files into data classes.
+8. The transformation functions convert parsed data into more useful models.
+9. Test files should be prefixed with 'test_'.
+10. Ensure two newlines between imports and top-level objects (functions, classes).
+
+Please continue from where we left off.
