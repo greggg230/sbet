@@ -9,10 +9,10 @@ class Game:
     team_id: int
     is_home: bool
     wl: str
-    w: float
-    l: float
+    w: int
+    l: int
     w_pct: float
-    min: float
+    min: int
     fgm: float
     fga: float
     fg_pct: float
@@ -30,7 +30,7 @@ class Game:
     blk: float
     tov: float
     pf: float
-    pts: float
+    pts: int
     a_team_id: int
     season_year: int
     season_type: str

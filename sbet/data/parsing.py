@@ -63,7 +63,7 @@ def read_games(file_path: str) -> List[Game]:
     return games
 
 
-def read_betting_odds(file_path: str) -> List[MoneyLineBettingOdds]:
+def read_money_line_betting_odds(file_path: str) -> List[MoneyLineBettingOdds]:
     betting_odds = []
     with open(file_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)

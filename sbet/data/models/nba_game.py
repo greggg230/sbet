@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from .nba_team import NbaTeam
+from sbet.data.models.nba_team import NbaTeam
 
 
 @dataclass(frozen=True)
@@ -10,3 +10,5 @@ class NbaGame:
     game_type: str
     home_team: NbaTeam
     away_team: NbaTeam
+    home_score: int
+    away_score: int

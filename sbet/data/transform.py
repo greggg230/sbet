@@ -5,31 +5,47 @@ from sbet.data.models.csv_models import Game, Team, MoneyLineBettingOdds
 
 def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame]:
     team_id_to_abbreviation: Dict[int, str] = {team.team_id: team.abbreviation for team in teams}
+    game_pairs: Dict[int, Dict[str, Game]] = {}
+
+    for game in games:
+        if game.game_id not in game_pairs:
+            game_pairs[game.game_id] = {"home": None, "away": None}
+
+        if game.is_home:
+            game_pairs[game.game_id]["home"] = game
+        else:
+            game_pairs[game.game_id]["away"] = game
 
     nba_games = []
-    for game in games:
-        home_team_abbreviation = team_id_to_abbreviation.get(game.team_id)
-        away_team_abbreviation = team_id_to_abbreviation.get(game.a_team_id)
+    for game_id, pair in game_pairs.items():
+        home_game = pair["home"]
+        away_game = pair["away"]
 
-        if home_team_abbreviation and away_team_abbreviation:
-            game_type = "Preseason" if "Preseason" in game.season_type else "Regular Season" if "Regular" in game.season_type else "Playoff"
+        if home_game and away_game:
+            home_team_abbreviation = team_id_to_abbreviation.get(home_game.team_id)
+            away_team_abbreviation = team_id_to_abbreviation.get(away_game.team_id)
 
-            nba_game = NbaGame(
-                game_id=game.game_id,
-                game_date=game.game_date,
-                season=game.season,
-                game_type=game_type,
-                home_team=NbaTeam[home_team_abbreviation],
-                away_team=NbaTeam[away_team_abbreviation]
-            )
-            nba_games.append(nba_game)
+            if home_team_abbreviation and away_team_abbreviation:
+                game_type = "Preseason" if "Preseason" in home_game.season_type else "Regular Season" if "Regular" in home_game.season_type else "Playoff"
+
+                nba_game = NbaGame(
+                    game_id=home_game.game_id,
+                    game_date=home_game.game_date,
+                    season=home_game.season,
+                    game_type=game_type,
+                    home_team=NbaTeam[home_team_abbreviation],
+                    away_team=NbaTeam[away_team_abbreviation],
+                    home_score=home_game.pts,
+                    away_score=away_game.pts
+                )
+                nba_games.append(nba_game)
 
     return nba_games
 
 
 def transform_to_nba_money_line_betting_opportunities(
-        money_line_betting_odds: List[MoneyLineBettingOdds],
-        nba_games: List[NbaGame]
+    money_line_betting_odds: List[MoneyLineBettingOdds],
+    nba_games: List[NbaGame]
 ) -> List[NbaMoneyLineBettingOpportunity]:
     game_id_to_nba_game: Dict[int, NbaGame] = {game.game_id: game for game in nba_games}
 
