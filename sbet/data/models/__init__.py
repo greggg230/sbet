@@ -1,5 +1,13 @@
-from .game import Game
-from .money_line_betting_odds import MoneyLineBettingOdds
-from .team import Team
+from .nba_team import NbaTeam
+from .nba_game import NbaGame
+from .csv_models.team import Team
+from .csv_models.game import Game
+from .csv_models.money_line_betting_odds import MoneyLineBettingOdds
 
-__all__ = ['Game', 'MoneyLineBettingOdds', 'Team']
+__all__ = [
+    "NbaTeam",
+    "Team",
+    "Game",
+    "MoneyLineBettingOdds",
+    "NbaGame"
+]

@@ -1,9 +1,9 @@
 import csv
 from typing import List
 
-from sbet.data.models.game import Game
-from sbet.data.models.money_line_betting_odds import MoneyLineBettingOdds
-from sbet.data.models.team import Team
+from sbet.data.models.csv_models.game import Game
+from sbet.data.models.csv_models.money_line_betting_odds import MoneyLineBettingOdds
+from sbet.data.models.csv_models.team import Team
 
 
 def read_teams(file_path: str) -> List[Team]:

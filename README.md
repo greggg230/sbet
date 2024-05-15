@@ -31,11 +31,19 @@ bash
 Copy code
 mypy .
 Data Class Definitions
-The following data classes are used to represent the data from the CSV files:
+The following data classes are used to represent the data from the CSV files and the derived models:
+
+CSV Models
+Located in sbet/data/models/csv_models:
 
 Team: Represents a team.
 Game: Represents a game.
 MoneyLineBettingOdds: Represents money line betting odds.
+Derived Models
+Located in sbet/data/models:
+
+NbaTeam: Enum representing NBA team abbreviations.
+NbaGame: Represents a derived model of an NBA game with enriched data.
 Usage Examples
 Example functions to read the CSV files and convert the rows into instances of the respective data classes can be found in the project files.
 
@@ -48,8 +56,11 @@ Use the read_games function to read the nba_games_all.csv file.
 Reading Betting Odds
 Use the read_betting_odds function to read the nba_betting_money_line.csv file.
 
+Transforming Data
+Use the transform_to_nba_games function to transform parsed game and team data into instances of NbaGame.
+
 Unit Tests
-Unit tests for the parsing functions can be found in the sbet/tests/test_parsing.py file. The tests ensure that every field in the CSV data is being parsed correctly.
+Unit tests for the parsing functions and transformation functions can be found in the sbet/tests directory. The tests ensure that every field in the CSV data is being parsed correctly and that the transformation functions work as expected.
 
 Running Unit Tests
 To run the unit tests, navigate to the project root and execute:
