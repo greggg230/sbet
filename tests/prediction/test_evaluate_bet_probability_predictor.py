@@ -4,7 +4,7 @@ from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
 from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 from sbet.data.historical.models import NbaGame
 from sbet.data.historical.models import NbaTeam
-from sbet.evaluate import evaluate_bet_probability_predictor
+from sbet.evaluation.evaluate import evaluate_bet_probability_predictor
 
 
 class TestEvaluateBetProbabilityPredictor(unittest.TestCase):

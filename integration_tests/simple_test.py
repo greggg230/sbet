@@ -3,7 +3,7 @@ import unittest
 from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
 from sbet.data.historical.parsing import read_teams, read_games, read_money_line_betting_odds
 from sbet.data.historical.transform import transform_to_nba_games, transform_to_nba_money_line_betting_opportunities
-from sbet.evaluate import evaluate_bet_probability_predictor
+from sbet.evaluation.evaluate import evaluate_bet_probability_predictor
 from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 
 
@@ -17,9 +17,9 @@ class TestIntegration(unittest.TestCase):
     def test_integration(self):
         # Construct the absolute paths to the data files
         base_dir = os.path.dirname(os.path.abspath(__file__))
-        teams_file = os.path.join(base_dir, '..', 'data', 'resources', 'nba_teams_all.csv')
-        games_file = os.path.join(base_dir, '..', 'data', 'resources', 'nba_games_all.csv')
-        betting_odds_file = os.path.join(base_dir, '..', 'data', 'resources', 'nba_betting_money_line.csv')
+        teams_file = os.path.join(base_dir, '../sbet', 'data', 'historical', 'resources', 'nba_teams_all.csv')
+        games_file = os.path.join(base_dir, '../sbet', 'data', 'historical', 'resources', 'nba_games_all.csv')
+        betting_odds_file = os.path.join(base_dir, '../sbet', 'data', 'historical', 'resources', 'nba_betting_money_line.csv')
 
         # Load the data
         teams = read_teams(teams_file)

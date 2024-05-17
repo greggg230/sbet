@@ -11,12 +11,13 @@ Here are some general rules around code style and how I expect code to be writte
 - Tests should mirror the directory structure of the code.  All tests live in sbet/tests.  So if we're writing a test for a file in sbet/data/parsing.py, we should make a directory sbet/tests/data/parsing/ which would contain all of the test cases for that file.
 - Never include "example usage" at the bottom of any file.
 - Never include blocks like `if __name__ == '__main__': ... ` in any files.
+- Always include two new lines between the imports at the top of the file and the first top level object.
 
 Here is a general overview of the code and the directory structure:
 
-- sbet/integration_tests => This is where integration tests live.
-- sbet/sbet => This is the application code.
-- sbet/tests => This is where the unit tests live.  As mentioned above, these tests should mirror the directory structure of the application code.
+- integration_tests => This is where integration tests live.
+- sbet => This is the application code.
+- tests => This is where the unit tests live.  As mentioned above, these tests should mirror the directory structure of the application code.
 
 - sbet/data => This directory contains code related to parsing and transforming the different kinds of data used by this project.  I've outlined the structure for the "historical" data, but the same pattern will be used for all kinds of data.
     - sbet/data/historical => This directory contains code and some CSV data related to historical data.  Historical data includes game information, including outcomes, and betting data (historical bets that were available for the games)
