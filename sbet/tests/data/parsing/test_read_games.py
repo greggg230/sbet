@@ -9,8 +9,8 @@ class TestReadGames(unittest.TestCase):
 
     def setUp(self):
         self.csv_data = """game_id,game_date,matchup,team_id,is_home,wl,w,l,w_pct,min,fgm,fga,fg_pct,fg3m,fg3a,fg3_pct,ftm,fta,ft_pct,oreb,dreb,reb,ast,stl,blk,tov,pf,pts,a_team_id,season_year,season_type,season
-        20800741,2009-02-06,ATL vs. BOS,1610612737,True,W,29,22,0.569,240,19,40,0.475,5,16,0.313,18,26,0.692,8,24,32,19,5,4,18,26,111,1610612738,2008,Regular Season,2008-09
-        20800741,2009-02-06,ATL vs. BOS,1610612738,False,L,29,22,0.569,240,19,40,0.475,5,16,0.313,18,26,0.692,8,24,32,19,5,4,18,26,105,1610612737,2008,Regular Season,2008-09"""
+        20800741,2009-02-06,ATL vs. BOS,1610612737,t,W,29,22,0.569,240,19,40,0.475,5,16,0.313,18,26,0.692,8,24,32,19,5,4,18,26,111,1610612738,2008,Regular Season,2008-09
+        20800741,2009-02-06,ATL vs. BOS,1610612738,f,L,29,22,0.569,240,19,40,0.475,5,16,0.313,18,26,0.692,8,24,32,19,5,4,18,26,105,1610612737,2008,Regular Season,2008-09"""
 
     def test_read_games(self):
         with tempfile.NamedTemporaryFile(delete=False, mode='w') as temp_file:

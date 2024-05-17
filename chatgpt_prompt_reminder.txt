@@ -29,3 +29,4 @@ Remember to:
 - Add two newlines between import statements and the first top-level object in a file.
 - Split example usage into separate code blocks.
 - Use class names and file prefixes as agreed (e.g., `test_` for test files).
+- Do not include the `if __name__ == '__main__'` block in any unit test or integration test code.
