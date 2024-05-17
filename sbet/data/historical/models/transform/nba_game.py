@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from sbet.data.models.nba_team import NbaTeam
+from sbet.data.historical.models.transform.nba_team import NbaTeam
 
 
 @dataclass(frozen=True)

@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from sbet.data.models import NbaMoneyLineBettingOpportunity
+from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 
 
 class BetProbabilityPredictor(ABC):

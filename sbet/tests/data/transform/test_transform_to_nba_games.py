@@ -1,7 +1,7 @@
 import unittest
-from sbet.data.models import NbaGame, NbaTeam
-from sbet.data.models.csv_models import Team, Game
-from sbet.data.transform import transform_to_nba_games
+from sbet.data.historical.models import NbaGame, NbaTeam
+from sbet.data.historical.models.csv import Team, Game
+from sbet.data.historical.transform import transform_to_nba_games
 from typing import List
 
 

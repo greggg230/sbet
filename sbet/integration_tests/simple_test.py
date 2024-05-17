@@ -1,10 +1,10 @@
 import os
 import unittest
 from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
-from sbet.data.parsing import read_teams, read_games, read_money_line_betting_odds
-from sbet.data.transform import transform_to_nba_games, transform_to_nba_money_line_betting_opportunities
+from sbet.data.historical.parsing import read_teams, read_games, read_money_line_betting_odds
+from sbet.data.historical.transform import transform_to_nba_games, transform_to_nba_money_line_betting_opportunities
 from sbet.evaluate import evaluate_bet_probability_predictor
-from sbet.data.models import NbaMoneyLineBettingOpportunity
+from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 
 
 class SimpleBetProbabilityPredictor(BetProbabilityPredictor):

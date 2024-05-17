@@ -1,7 +1,7 @@
 import unittest
 import tempfile
-from sbet.data.models.csv_models import MoneyLineBettingOdds
-from sbet.data.parsing import read_money_line_betting_odds
+from sbet.data.historical.models import MoneyLineBettingOdds
+from sbet.data.historical.parsing import read_money_line_betting_odds
 from typing import List
 
 

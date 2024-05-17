@@ -1,6 +1,6 @@
 from typing import List, Dict
-from sbet.data.models import NbaGame, NbaMoneyLineBettingOpportunity, NbaTeam
-from sbet.data.models.csv_models import Game, Team, MoneyLineBettingOdds
+from sbet.data.historical.models import NbaGame, NbaMoneyLineBettingOpportunity, NbaTeam
+from sbet.data.historical.models import Game, Team, MoneyLineBettingOdds
 
 
 def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame]:

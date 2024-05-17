@@ -1,6 +1,6 @@
 from typing import List
 from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
-from sbet.data.models.nba_money_line_betting_opportunity import NbaMoneyLineBettingOpportunity
+from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 
 
 def evaluate_bet_probability_predictor(

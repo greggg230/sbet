@@ -1,9 +1,9 @@
 import csv
 from typing import List
 
-from sbet.data.models.csv_models.game import Game
-from sbet.data.models.csv_models.money_line_betting_odds import MoneyLineBettingOdds
-from sbet.data.models.csv_models.team import Team
+from sbet.data.historical.models import Game
+from sbet.data.historical.models import MoneyLineBettingOdds
+from sbet.data.historical.models.csv.team import Team
 
 
 def read_teams(file_path: str) -> List[Team]:
@@ -23,6 +23,7 @@ def read_teams(file_path: str) -> List[Team]:
             except ValueError as e:
                 print(f"Skipping row due to error: {e}")
     return teams
+
 
 def read_games(file_path: str) -> List[Game]:
     games: List[Game] = []

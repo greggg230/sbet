@@ -1,7 +1,7 @@
 import unittest
 import tempfile
-from sbet.data.models.csv_models import Game
-from sbet.data.parsing import read_games
+from sbet.data.historical.models import Game
+from sbet.data.historical.parsing import read_games
 from typing import List
 
 
