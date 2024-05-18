@@ -1,6 +1,7 @@
 import csv
 from typing import List
 
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.csv.play import Play
 
 
@@ -8,6 +9,7 @@ def parse_plays(csv_path: str) -> List[Play]:
     plays = []
     with open(csv_path, newline='') as csvfile:
         reader = csv.DictReader(csvfile)
+        row: dict[str, str]
         for row in reader:
             play = Play(
                 game_id=int(row['game_id']),
