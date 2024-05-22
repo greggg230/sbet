@@ -1,17 +1,14 @@
 from dataclasses import replace
-from frozendict import frozendict
-from sbet.data.play_by_play.models.transform.game_state import GameState
-from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, Foul, JumpBall
+    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, Foul, JumpBall, Rebound
 )
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoul
 )
-
-
-class UnrecognizedPlayException(Exception):
-    pass
+from sbet.data.play_by_play.models.transform.game_state import GameState
+from sbet.data.play_by_play.models.transform.player import Player
+from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
+from frozendict import frozendict
 
 
 def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
@@ -20,70 +17,55 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
 
     match play:
         case FieldGoalAttempt(shot_made=True, points=points):
-            if game_state.home_team_has_possession:
-                home_score = game_state.home_score + points
-                away_score = game_state.away_score
-            else:
-                home_score = game_state.home_score
-                away_score = game_state.away_score + points
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession,
-                           home_score=home_score,
-                           away_score=away_score)
+            new_home_score = game_state.home_score + points if game_state.home_team_has_possession else game_state.home_score
+            new_away_score = game_state.away_score + points if not game_state.home_team_has_possession else game_state.away_score
+            return replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score)
 
         case FieldGoalAttempt(shot_made=False):
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession)
+            return state_with_updated_time
 
-        case Substitution(home_team_lineup=home_lineup, away_team_lineup=away_lineup):
-            return replace(state_with_updated_time,
-                           home_team_lineup=home_lineup,
-                           away_team_lineup=away_lineup)
+        case Foul(committed_by=fouler):
+            new_personal_foul_count = game_state.personal_foul_count | {fouler: game_state.personal_foul_count.get(fouler, 0) + 1}
+            return replace(state_with_updated_time, personal_foul_count=new_personal_foul_count)
+
+        case JumpBall(did_home_team_win=True):
+            return replace(state_with_updated_time, home_team_has_possession=True)
+
+        case JumpBall(did_home_team_win=False):
+            return replace(state_with_updated_time, home_team_has_possession=False)
 
         case PeriodStart(period_number=period):
-            return replace(state_with_updated_time,
-                           current_period=period,
-                           personal_foul_count=frozendict(),
-                           milliseconds_remaining_in_period=720000 if period <= 4 else 300000)
+            return replace(state_with_updated_time, current_period=period, milliseconds_remaining_in_period=720000)
 
-        case PeriodEnd():
-            return replace(state_with_updated_time,
-                           milliseconds_remaining_in_period=0)
+        case PeriodEnd(period_number=period):
+            return replace(state_with_updated_time, current_period=period + 1, milliseconds_remaining_in_period=0)
 
         case Timeout(is_home=True):
-            return replace(state_with_updated_time,
-                           home_timeouts=game_state.home_timeouts - 1)
+            return replace(state_with_updated_time, home_timeouts=game_state.home_timeouts - 1)
 
         case Timeout(is_home=False):
-            return replace(state_with_updated_time,
-                           away_timeouts=game_state.away_timeouts - 1)
+            return replace(state_with_updated_time, away_timeouts=game_state.away_timeouts - 1)
 
-        case Foul(committed_by=player):
-            new_personal_foul_count = frozendict(game_state.personal_foul_count | {player: game_state.personal_foul_count.get(player, 0) + 1})
-            return replace(state_with_updated_time,
-                           personal_foul_count=new_personal_foul_count)
+        case Rebound(is_offensive=True):
+            return state_with_updated_time
 
-        case JumpBall(did_home_team_win=home_win):
-            return replace(state_with_updated_time,
-                           home_team_has_possession=home_win)
+        case Rebound(is_offensive=False):
+            return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
-        case Steal():
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession)
+        case Steal(stolen_by=stealer):
+            return replace(state_with_updated_time, home_team_has_possession=stealer in game_state.home_team_lineup)
 
         case ShotClockViolation():
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession)
+            return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
         case OutOfBoundsTurnover():
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession)
+            return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
         case OffensiveFoul(fouling_player=fouler):
-            new_personal_foul_count = frozendict(game_state.personal_foul_count | {fouler: game_state.personal_foul_count.get(fouler, 0) + 1})
-            return replace(state_with_updated_time,
-                           home_team_has_possession=not game_state.home_team_has_possession,
-                           personal_foul_count=new_personal_foul_count)
+            return replace(state_with_updated_time, home_team_has_possession=fouler not in game_state.home_team_lineup)
+
+        case Substitution(home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup):
+            return replace(state_with_updated_time, home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup)
 
         case _:
-            raise UnrecognizedPlayException(f"Unrecognized play type: {type(play)}")
+            raise ValueError(f"Unrecognized play type: {play}")
