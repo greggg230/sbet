@@ -28,5 +28,5 @@ class OutOfBoundsTurnover(Turnover):
 
 
 @dataclass(frozen=True)
-class OffensiveFoul(Turnover):
-    fouling_player: Player
+class OffensiveFoulTurnover(NbaPlay):
+    pass

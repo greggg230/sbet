@@ -1,76 +1,43 @@
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, PeriodStart, PeriodEnd, Foul, JumpBall, Rebound, Timeout, Substitution
+    FieldGoalAttempt, Foul, JumpBall, PeriodStart, PeriodEnd, Rebound, Timeout, Substitution
+)
+from sbet.data.play_by_play.models.transform.turnover import (
+    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
 )
 from sbet.data.play_by_play.models.transform.player import Player
-from sbet.data.play_by_play.models.transform.turnover import (
-    OffensiveFoul, Steal, ShotClockViolation, OutOfBoundsTurnover
-)
+from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 
 
-def convert_to_nba_play(play: Play):
-    play_length = int(play.play_length.split(':')[2]) * 1000 + int(play.play_length.split(':')[1]) * 60000 + int(play.play_length.split(':')[0]) * 3600000
+def parse_play_length(play_length_str: str) -> int:
+    h, m, s = map(int, play_length_str.split(':'))
+    return (h * 3600 + m * 60 + s) * 1000
 
-    if play.event_type == "start of period":
-        return PeriodStart(
-            play_length=play_length,
-            play_id=play.play_id,
-            period_number=play.period,
-            home_team_lineup=frozenset(Player(p) for p in [play.h1, play.h2, play.h3, play.h4, play.h5]),
-            away_team_lineup=frozenset(Player(p) for p in [play.a1, play.a2, play.a3, play.a4, play.a5])
-        )
 
-    if play.event_type == "end of period":
-        return PeriodEnd(
-            play_length=play_length,
-            play_id=play.play_id,
-            period_number=play.period
-        )
-
+def convert_to_nba_play(play: Play) -> NbaPlay:
+    play_length = parse_play_length(play.play_length)
     if play.event_type == "shot":
         return FieldGoalAttempt(
             play_length=play_length,
             play_id=play.play_id,
             shot_made=play.result == "made",
-            points=play.points
+            points=play.points or 0
         )
-
-    if play.event_type == "foul":
-        return Foul(
-            play_length=play_length,
-            play_id=play.play_id,
-            foul_type=play.type,
-            committed_by=Player(play.player)
-        )
-
-    if play.event_type == "jump ball":
-        home_player = Player(play.home)
-        away_player = Player(play.away)
-        did_home_team_win = Player(play.player) == home_player
-        return JumpBall(
-            play_length=play_length,
-            play_id=play.play_id,
-            home_player=home_player,
-            away_player=away_player,
-            did_home_team_win=did_home_team_win
-        )
-
-    if play.event_type == "rebound":
+    elif play.event_type == "rebound":
         return Rebound(
             play_length=play_length,
             play_id=play.play_id,
             rebounding_player=Player(play.player) if play.player else None,
             is_offensive=play.type == "rebound offensive"
         )
-
-    if play.event_type == "timeout":
-        return Timeout(
+    elif play.event_type == "foul":
+        return Foul(
             play_length=play_length,
             play_id=play.play_id,
-            is_home=play.team == "home"
+            foul_type=play.type,
+            committed_by=Player(play.player)
         )
-
-    if play.event_type == "turnover":
+    elif play.event_type == "turnover":
         if play.steal:
             return Steal(
                 play_length=play_length,
@@ -83,30 +50,53 @@ def convert_to_nba_play(play: Play):
                 play_length=play_length,
                 play_id=play.play_id
             )
-        elif play.type in ["bad pass", "out of bounds lost ball"]:
+        elif play.type in {"out of bounds lost ball", "bad pass"}:
             return OutOfBoundsTurnover(
                 play_length=play_length,
                 play_id=play.play_id,
                 player=Player(play.player)
             )
+        elif play.type == "offensive foul":
+            return OffensiveFoulTurnover(
+                play_length=play_length,
+                play_id=play.play_id
+            )
         else:
             raise ValueError(f"Unrecognized turnover type: {play.type}")
-
-    if play.event_type == "offensive foul":
-        return OffensiveFoul(
+    elif play.event_type == "start of period":
+        return PeriodStart(
             play_length=play_length,
             play_id=play.play_id,
-            fouling_player=Player(play.player)
+            period_number=play.period,
+            home_team_lineup=frozenset(Player(p) for p in [play.h1, play.h2, play.h3, play.h4, play.h5]),
+            away_team_lineup=frozenset(Player(p) for p in [play.a1, play.a2, play.a3, play.a4, play.a5])
         )
-
-    if play.event_type == "substitution":
-        home_team_lineup = frozenset(Player(p) for p in [play.h1, play.h2, play.h3, play.h4, play.h5])
-        away_team_lineup = frozenset(Player(p) for p in [play.a1, play.a2, play.a3, play.a4, play.a5])
+    elif play.event_type == "end of period":
+        return PeriodEnd(
+            play_length=play_length,
+            play_id=play.play_id,
+            period_number=play.period
+        )
+    elif play.event_type == "timeout":
+        return Timeout(
+            play_length=play_length,
+            play_id=play.play_id,
+            is_home=play.team == "home"
+        )
+    elif play.event_type == "substitution":
         return Substitution(
             play_length=play_length,
             play_id=play.play_id,
-            home_team_lineup=home_team_lineup,
-            away_team_lineup=away_team_lineup
+            home_team_lineup=frozenset(Player(p) for p in [play.h1, play.h2, play.h3, play.h4, play.h5]),
+            away_team_lineup=frozenset(Player(p) for p in [play.a1, play.a2, play.a3, play.a4, play.a5])
         )
-
-    raise ValueError(f"Unrecognized play type: {play.event_type}")
+    elif play.event_type == "jump ball":
+        return JumpBall(
+            play_length=play_length,
+            play_id=play.play_id,
+            home_player=Player(play.home),
+            away_player=Player(play.away),
+            did_home_team_win=(play.player == play.home)
+        )
+    else:
+        raise ValueError(f"Unrecognized play type: {play.event_type}")

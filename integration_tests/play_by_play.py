@@ -6,6 +6,7 @@ from sbet.data.play_by_play.models.transform.plays import (
     FieldGoalAttempt, PeriodStart, Foul, JumpBall, Rebound, Timeout
 )
 from sbet.data.play_by_play.models.transform.player import Player
+from sbet.data.play_by_play.models.transform.turnover import OutOfBoundsTurnover, Steal, OffensiveFoulTurnover
 from sbet.data.play_by_play.update_game_state import update_game_state
 from sbet.data.play_by_play.models.transform.game_state import GameState
 from frozendict import frozendict
@@ -49,20 +50,30 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
             FieldGoalAttempt(play_length=22000, play_id=8, shot_made=False, points=0),
             Rebound(play_length=2000, play_id=9, rebounding_player=Player("Tyus Jones"), is_offensive=False),
             FieldGoalAttempt(play_length=13000, play_id=10, shot_made=True, points=2),
-            FieldGoalAttempt(play_length=15000, play_id=11, shot_made=False, points=0),  # Missed floating jump shot by Stephen Curry
-            Rebound(play_length=3000, play_id=12, rebounding_player=Player("Steven Adams"), is_offensive=False),  # Defensive rebound by Steven Adams
-            FieldGoalAttempt(play_length=6000, play_id=13, shot_made=True, points=2),  # Made layup by Desmond Bane
-            FieldGoalAttempt(play_length=15000, play_id=14, shot_made=True, points=3),  # Made 3pt jump shot by Stephen Curry
-            FieldGoalAttempt(play_length=17000, play_id=15, shot_made=False, points=0),  # Missed 3pt pullup jump shot by Dillon Brooks
-            Rebound(play_length=3000, play_id=16, rebounding_player=Player("Kevon Looney"), is_offensive=False),  # Defensive rebound by Kevon Looney
-            FieldGoalAttempt(play_length=3000, play_id=17, shot_made=True, points=2),  # Made layup by Draymond Green
-            FieldGoalAttempt(play_length=9000, play_id=18, shot_made=False, points=0),  # Missed 3pt jump shot by Dillon Brooks
-            Rebound(play_length=3000, play_id=19, rebounding_player=Player("Draymond Green"), is_offensive=False),  # Defensive rebound by Draymond Green
-            Foul(play_length=5000, play_id=20, foul_type="offensive", committed_by=Player("Kevon Looney"))  # Offensive foul by Kevon Looney
+            FieldGoalAttempt(play_length=15000, play_id=11, shot_made=False, points=0),
+            Rebound(play_length=3000, play_id=12, rebounding_player=Player("Steven Adams"), is_offensive=False),
+            FieldGoalAttempt(play_length=6000, play_id=13, shot_made=True, points=2),
+            FieldGoalAttempt(play_length=15000, play_id=14, shot_made=True, points=3),
+            FieldGoalAttempt(play_length=17000, play_id=15, shot_made=False, points=0),
+            Rebound(play_length=3000, play_id=16, rebounding_player=Player("Kevon Looney"), is_offensive=False),
+            FieldGoalAttempt(play_length=3000, play_id=17, shot_made=True, points=2),
+            FieldGoalAttempt(play_length=9000, play_id=18, shot_made=False, points=0),
+            Rebound(play_length=3000, play_id=19, rebounding_player=Player("Draymond Green"), is_offensive=False),
+            Foul(play_length=5000, play_id=20, foul_type="offensive", committed_by=Player("Kevon Looney")),
+            OffensiveFoulTurnover(play_length=0, play_id=21),
+            FieldGoalAttempt(play_length=19000, play_id=22, shot_made=False, points=0),
+            Rebound(play_length=3000, play_id=23, rebounding_player=Player("Klay Thompson"), is_offensive=False),
+            FieldGoalAttempt(play_length=2000, play_id=24, shot_made=False, points=0),
+            Rebound(play_length=2000, play_id=25, rebounding_player=Player("Klay Thompson"), is_offensive=True),
+            FieldGoalAttempt(play_length=5000, play_id=26, shot_made=False, points=0),
+            Rebound(play_length=2000, play_id=27, rebounding_player=Player("Steven Adams"), is_offensive=False),
+            Steal(play_length=9000, play_id=28, stolen_from=Player("Steven Adams"), stolen_by=Player("Draymond Green")),
+            FieldGoalAttempt(play_length=4000, play_id=29, shot_made=True, points=3),
+            Timeout(play_length=1000, play_id=30, is_home=False)
         ]
 
         game_state = self.initial_state
-        for play, expected in zip(self.plays[:20], expected_plays):
+        for play, expected in zip(self.plays[:30], expected_plays):
             nba_play = convert_to_nba_play(play)
             game_state = update_game_state(game_state, nba_play)
             with self.subTest(play_id=play.play_id):
@@ -79,3 +90,9 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
                     game_state.away_team_lineup,
                     frozenset(Player(p) for p in [play.a1, play.a2, play.a3, play.a4, play.a5])
                 )
+                # Check period consistency
+                self.assertEqual(game_state.current_period, play.period)
+                # Check time remaining consistency
+                h, m, s = map(int, play.remaining_time.split(':'))
+                expected_remaining_time = (h * 3600 + m * 60 + s) * 1000
+                self.assertEqual(game_state.milliseconds_remaining_in_period, expected_remaining_time)

@@ -5,7 +5,7 @@ from sbet.data.play_by_play.models.transform.plays import (
     FieldGoalAttempt, Foul, JumpBall, PeriodStart, Rebound, Substitution, Timeout
 )
 from sbet.data.play_by_play.models.transform.turnover import (
-    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoul
+    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
 )
 from sbet.data.play_by_play.models.transform.game_state import GameState
 from sbet.data.play_by_play.update_game_state import update_game_state
@@ -48,17 +48,13 @@ class TestUpdateGameState(unittest.TestCase):
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
 
     def test_period_start(self):
-        play = PeriodStart(
-            play_length=0,
-            play_id=4,
-            period_number=2,
-            home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}),
-            away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")})
-        )
+        play = PeriodStart(play_length=0, play_id=4, period_number=2,
+                           home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H5")}),
+                           away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}))
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.current_period, 2)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 720000)
-        self.assertEqual(updated_state.home_team_lineup, frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}))
+        self.assertEqual(updated_state.home_team_lineup, frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H5")}))
         self.assertEqual(updated_state.away_team_lineup, frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}))
 
     def test_rebound_offensive(self):
@@ -74,7 +70,9 @@ class TestUpdateGameState(unittest.TestCase):
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
 
     def test_substitution(self):
-        play = Substitution(play_length=2000, play_id=6, home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}), away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}))
+        play = Substitution(play_length=2000, play_id=6,
+                            home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}),
+                            away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}))
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_team_lineup, frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}))
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
@@ -103,8 +101,8 @@ class TestUpdateGameState(unittest.TestCase):
         self.assertFalse(updated_state.home_team_has_possession)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
 
-    def test_offensive_foul(self):
-        play = OffensiveFoul(play_length=2000, play_id=11, fouling_player=Player("H1"))
+    def test_offensive_foul_turnover(self):
+        play = OffensiveFoulTurnover(play_length=2000, play_id=11)
         updated_state = update_game_state(self.initial_state, play)
         self.assertFalse(updated_state.home_team_has_possession)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
