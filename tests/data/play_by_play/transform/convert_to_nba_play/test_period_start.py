@@ -2,6 +2,7 @@ import unittest
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import PeriodStart
 from sbet.data.play_by_play.transform import convert_to_nba_play
+from sbet.data.play_by_play.models.transform.player import Player
 
 
 class TestConvertToNbaPlayPeriodStart(unittest.TestCase):
@@ -9,18 +10,18 @@ class TestConvertToNbaPlayPeriodStart(unittest.TestCase):
     def setUp(self):
         self.raw_play_period_start = Play(
             game_id=1,
-            data_set="data_set",
-            date="2023-01-01",
-            a1="A1", a2="A2", a3="A3", a4="A4", a5="A5",
-            h1="H1", h2="H2", h3="H3", h4="H4", h5="H5",
+            data_set="2021-22 Playoffs",
+            date="2022-05-13",
+            a1="Steven Adams", a2="Tyus Jones", a3="Jaren Jackson Jr.", a4="Desmond Bane", a5="Dillon Brooks",
+            h1="Kevon Looney", h2="Draymond Green", h3="Andrew Wiggins", h4="Stephen Curry", h5="Klay Thompson",
             period=1,
             away_score=0,
             home_score=0,
-            remaining_time="11:00",
+            remaining_time="12:00",
             elapsed="0:00:00",
             play_length="0:00:00",
             play_id=1,
-            team="home",
+            team="",
             event_type="start of period",
             assist=None,
             away=None,
@@ -51,6 +52,20 @@ class TestConvertToNbaPlayPeriodStart(unittest.TestCase):
         expected_play = PeriodStart(
             play_length=0,
             play_id=1,
-            period_number=1
+            period_number=1,
+            home_team_lineup=frozenset({
+                Player("Kevon Looney"),
+                Player("Draymond Green"),
+                Player("Andrew Wiggins"),
+                Player("Stephen Curry"),
+                Player("Klay Thompson")
+            }),
+            away_team_lineup=frozenset({
+                Player("Steven Adams"),
+                Player("Tyus Jones"),
+                Player("Jaren Jackson Jr."),
+                Player("Desmond Bane"),
+                Player("Dillon Brooks")
+            })
         )
         self.assertEqual(nba_play, expected_play)

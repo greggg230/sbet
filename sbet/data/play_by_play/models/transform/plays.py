@@ -20,6 +20,8 @@ class Substitution(NbaPlay):
 @dataclass(frozen=True)
 class PeriodStart(NbaPlay):
     period_number: int
+    home_team_lineup: FrozenSet[Player]
+    away_team_lineup: FrozenSet[Player]
 
 
 @dataclass(frozen=True)

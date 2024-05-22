@@ -19,7 +19,12 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
         case FieldGoalAttempt(shot_made=True, points=points):
             new_home_score = game_state.home_score + points if game_state.home_team_has_possession else game_state.home_score
             new_away_score = game_state.away_score + points if not game_state.home_team_has_possession else game_state.away_score
-            return replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score)
+            return replace(
+                state_with_updated_time,
+                home_score=new_home_score,
+                away_score=new_away_score,
+                home_team_has_possession=not game_state.home_team_has_possession
+            )
 
         case FieldGoalAttempt(shot_made=False):
             return state_with_updated_time
@@ -34,8 +39,14 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
         case JumpBall(did_home_team_win=False):
             return replace(state_with_updated_time, home_team_has_possession=False)
 
-        case PeriodStart(period_number=period):
-            return replace(state_with_updated_time, current_period=period, milliseconds_remaining_in_period=720000)
+        case PeriodStart(period_number=period, home_team_lineup=home_lineup, away_team_lineup=away_lineup):
+            return replace(
+                state_with_updated_time,
+                current_period=period,
+                milliseconds_remaining_in_period=720000,
+                home_team_lineup=home_lineup,
+                away_team_lineup=away_lineup
+            )
 
         case PeriodEnd(period_number=period):
             return replace(state_with_updated_time, current_period=period + 1, milliseconds_remaining_in_period=0)

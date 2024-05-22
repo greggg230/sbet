@@ -1,6 +1,4 @@
 import unittest
-
-
 from frozendict import frozendict
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.plays import (
@@ -35,6 +33,7 @@ class TestUpdateGameState(unittest.TestCase):
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 2)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
+        self.assertFalse(updated_state.home_team_has_possession)
 
     def test_foul(self):
         play = Foul(play_length=2000, play_id=2, foul_type="personal", committed_by=Player("H1"))
@@ -49,10 +48,18 @@ class TestUpdateGameState(unittest.TestCase):
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
 
     def test_period_start(self):
-        play = PeriodStart(play_length=0, play_id=4, period_number=2)
+        play = PeriodStart(
+            play_length=0,
+            play_id=4,
+            period_number=2,
+            home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}),
+            away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")})
+        )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.current_period, 2)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 720000)
+        self.assertEqual(updated_state.home_team_lineup, frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H6")}))
+        self.assertEqual(updated_state.away_team_lineup, frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}))
 
     def test_rebound_offensive(self):
         play = Rebound(play_length=2000, play_id=5, rebounding_player=Player("H1"), is_offensive=True)
@@ -94,6 +101,7 @@ class TestUpdateGameState(unittest.TestCase):
         play = OutOfBoundsTurnover(play_length=2000, play_id=10, player=Player("H1"))
         updated_state = update_game_state(self.initial_state, play)
         self.assertFalse(updated_state.home_team_has_possession)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
 
     def test_offensive_foul(self):
         play = OffensiveFoul(play_length=2000, play_id=11, fouling_player=Player("H1"))
