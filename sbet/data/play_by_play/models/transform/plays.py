@@ -38,6 +38,7 @@ class Timeout(NbaPlay):
 class Foul(NbaPlay):
     foul_type: str
     committed_by: Player
+    is_offensive: bool
 
 
 @dataclass(frozen=True)
@@ -51,3 +52,8 @@ class JumpBall(NbaPlay):
 class Rebound(NbaPlay):
     rebounding_player: Optional[Player]
     is_offensive: bool
+
+
+@dataclass(frozen=True)
+class FreeThrow(NbaPlay):
+    shot_made: bool

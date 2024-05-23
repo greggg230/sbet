@@ -1,14 +1,13 @@
 from dataclasses import replace
+
+from sbet.data.play_by_play.models.transform.game_state import GameState, FreeThrowState
+from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, Foul, JumpBall, Rebound
+    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, Foul, JumpBall, Rebound, FreeThrow
 )
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
 )
-from sbet.data.play_by_play.models.transform.game_state import GameState
-from sbet.data.play_by_play.models.transform.player import Player
-from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
-from frozendict import frozendict
 
 
 def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
@@ -24,9 +23,31 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
         case FieldGoalAttempt(shot_made=False):
             return state_with_updated_time
 
-        case Foul(committed_by=fouler):
+        case Foul(committed_by=fouler, is_offensive=is_offensive, foul_type=foul_type):
             new_personal_foul_count = game_state.personal_foul_count | {fouler: game_state.personal_foul_count.get(fouler, 0) + 1}
-            return replace(state_with_updated_time, personal_foul_count=new_personal_foul_count)
+            new_state = replace(state_with_updated_time, personal_foul_count=new_personal_foul_count)
+            if not is_offensive:
+                if game_state.home_team_has_possession:
+                    new_state = replace(new_state, away_team_fouls=game_state.away_team_fouls + 1)
+                    if game_state.away_team_fouls + 1 >= 5 or foul_type == "shooting":
+                        new_state = replace(new_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=True, shooting_team_gets_possession_after=False))
+                else:
+                    new_state = replace(new_state, home_team_fouls=game_state.home_team_fouls + 1)
+                    if game_state.home_team_fouls + 1 >= 5 or foul_type == "shooting":
+                        new_state = replace(new_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=False, shooting_team_gets_possession_after=False))
+            return new_state
+
+        case FreeThrow(shot_made=shot_made):
+            if game_state.free_throw_state is None or game_state.free_throw_state.free_throws_remaining < 1:
+                raise ValueError("Unexpected FreeThrow play with no free throws remaining")
+            new_home_score = game_state.home_score + 1 if game_state.free_throw_state.for_home_team and shot_made else game_state.home_score
+            new_away_score = game_state.away_score + 1 if not game_state.free_throw_state.for_home_team and shot_made else game_state.away_score
+            free_throws_remaining = game_state.free_throw_state.free_throws_remaining - 1
+            new_free_throw_state = replace(game_state.free_throw_state, free_throws_remaining=free_throws_remaining)
+            new_state = replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score, free_throw_state=new_free_throw_state if free_throws_remaining > 0 else None)
+            if free_throws_remaining == 0:
+                new_state = replace(new_state, home_team_has_possession=not game_state.free_throw_state.for_home_team)
+            return new_state
 
         case JumpBall(did_home_team_win=True):
             return replace(state_with_updated_time, home_team_has_possession=True)
@@ -52,17 +73,8 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
         case Rebound(is_offensive=False):
             return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
-        case Steal(stolen_by=stealer):
-            return replace(state_with_updated_time, home_team_has_possession=stealer in game_state.home_team_lineup)
-
-        case ShotClockViolation():
+        case Steal() | ShotClockViolation() | OutOfBoundsTurnover() | OffensiveFoulTurnover():
             return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
-
-        case OutOfBoundsTurnover():
-            return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
-
-        case OffensiveFoulTurnover():
-            return replace(state_with_updated_time, home_team_has_possession=False)
 
         case Substitution(home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup):
             return replace(state_with_updated_time, home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup)

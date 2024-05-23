@@ -9,20 +9,20 @@ class TestConvertToNbaPlayRebound(unittest.TestCase):
 
     def setUp(self):
         self.raw_play_offensive_rebound = Play(
-            game_id=1,
-            data_set="data_set",
-            date="2023-01-01",
-            a1="A1", a2="A2", a3="A3", a4="A4", a5="A5",
-            h1="H1", h2="H2", h3="H3", h4="H4", h5="H5",
+            game_id=42100236,
+            data_set='2021-22 Playoffs',
+            date='2022-05-13',
+            a1='Steven Adams', a2='Tyus Jones', a3='Jaren Jackson Jr.', a4='Desmond Bane', a5='Dillon Brooks',
+            h1='Kevon Looney', h2='Draymond Green', h3='Andrew Wiggins', h4='Stephen Curry', h5='Klay Thompson',
             period=1,
-            away_score=0,
-            home_score=0,
-            remaining_time="11:00",
-            elapsed="0:00:00",
-            play_length="0:00:03",
-            play_id=1,
-            team="home",
-            event_type="rebound",
+            away_score=7,
+            home_score=13,
+            remaining_time='0:06:49',
+            elapsed='0:05:11',
+            play_length='0:00:02',
+            play_id=41,
+            team='GSW',
+            event_type='rebound',
             assist=None,
             away=None,
             home=None,
@@ -32,36 +32,75 @@ class TestConvertToNbaPlayRebound(unittest.TestCase):
             num=None,
             opponent=None,
             outof=None,
-            player="H1",
+            player='Kevon Looney',
             points=None,
             possession=None,
             reason=None,
             result=None,
             steal=None,
-            type="rebound offensive",
+            type='rebound offensive',
             shot_distance=None,
             original_x=None,
             original_y=None,
             converted_x=None,
             converted_y=None,
-            description="Offensive rebound by H1"
+            description='Looney REBOUND (Off:2 Def:1)'
+        )
+
+        self.raw_play_team_rebound = Play(
+            game_id=42100236,
+            data_set='2021-22 Playoffs',
+            date='2022-05-13',
+            a1='Steven Adams', a2='Tyus Jones', a3='Jaren Jackson Jr.', a4='Desmond Bane', a5='Dillon Brooks',
+            h1='Kevon Looney', h2='Draymond Green', h3='Andrew Wiggins', h4='Stephen Curry', h5='Klay Thompson',
+            period=1,
+            away_score=7,
+            home_score=13,
+            remaining_time='0:06:49',
+            elapsed='0:05:11',
+            play_length='0:00:00',
+            play_id=49,
+            team='MEM',
+            event_type='rebound',
+            assist=None,
+            away=None,
+            home=None,
+            block=None,
+            entered=None,
+            left=None,
+            num=None,
+            opponent=None,
+            outof=None,
+            player=None,
+            points=None,
+            possession=None,
+            reason=None,
+            result=None,
+            steal=None,
+            type='team rebound',
+            shot_distance=None,
+            original_x=None,
+            original_y=None,
+            converted_x=None,
+            converted_y=None,
+            description='Grizzlies Rebound'
         )
 
         self.raw_play_defensive_rebound = Play(
-            game_id=1,
-            data_set="data_set",
-            date="2023-01-01",
-            a1="A1", a2="A2", a3="A3", a4="A4", a5="A5",
-            h1="H1", h2="H2", h3="H3", h4="H4", h5="H5",
+            game_id=42100236,
+            data_set='2021-22 Playoffs',
+            date='2022-05-13',
+            a1='Steven Adams', a2='Tyus Jones', a3='Jaren Jackson Jr.', a4='Desmond Bane', a5='Dillon Brooks',
+            h1='Kevon Looney', h2='Draymond Green', h3='Andrew Wiggins', h4='Stephen Curry', h5='Klay Thompson',
             period=1,
-            away_score=0,
-            home_score=0,
-            remaining_time="11:00",
-            elapsed="0:00:00",
-            play_length="0:00:03",
-            play_id=1,
-            team="home",
-            event_type="rebound",
+            away_score=7,
+            home_score=13,
+            remaining_time='0:06:49',
+            elapsed='0:05:11',
+            play_length='0:00:02',
+            play_id=45,
+            team='GSW',
+            event_type='rebound',
             assist=None,
             away=None,
             home=None,
@@ -71,37 +110,41 @@ class TestConvertToNbaPlayRebound(unittest.TestCase):
             num=None,
             opponent=None,
             outof=None,
-            player="A1",
+            player='Kevon Looney',
             points=None,
             possession=None,
             reason=None,
             result=None,
             steal=None,
-            type="rebound defensive",
+            type='rebound defensive',
             shot_distance=None,
             original_x=None,
             original_y=None,
             converted_x=None,
             converted_y=None,
-            description="Defensive rebound by A1"
+            description='Looney REBOUND (Off:2 Def:2)'
         )
 
     def test_convert_to_nba_play_offensive_rebound(self):
         nba_play = convert_to_nba_play(self.raw_play_offensive_rebound)
-        expected_play = Rebound(
-            play_length=3000,
-            play_id=1,
-            rebounding_player=Player("H1"),
-            is_offensive=True
-        )
-        self.assertEqual(nba_play, expected_play)
+        self.assertIsInstance(nba_play, Rebound)
+        self.assertEqual(nba_play.play_length, 2000)
+        self.assertEqual(nba_play.play_id, 41)
+        self.assertEqual(nba_play.rebounding_player, Player("Kevon Looney"))
+        self.assertTrue(nba_play.is_offensive)
+
+    def test_convert_to_nba_play_team_rebound(self):
+        nba_play = convert_to_nba_play(self.raw_play_team_rebound)
+        self.assertIsInstance(nba_play, Rebound)
+        self.assertEqual(nba_play.play_length, 0)
+        self.assertEqual(nba_play.play_id, 49)
+        self.assertIsNone(nba_play.rebounding_player)
+        self.assertTrue(nba_play.is_offensive)
 
     def test_convert_to_nba_play_defensive_rebound(self):
         nba_play = convert_to_nba_play(self.raw_play_defensive_rebound)
-        expected_play = Rebound(
-            play_length=3000,
-            play_id=1,
-            rebounding_player=Player("A1"),
-            is_offensive=False
-        )
-        self.assertEqual(nba_play, expected_play)
+        self.assertIsInstance(nba_play, Rebound)
+        self.assertEqual(nba_play.play_length, 2000)
+        self.assertEqual(nba_play.play_id, 45)
+        self.assertEqual(nba_play.rebounding_player, Player("Kevon Looney"))
+        self.assertFalse(nba_play.is_offensive)
