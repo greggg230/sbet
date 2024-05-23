@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.turnover import OutOfBoundsTurnover
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -48,7 +50,7 @@ class TestConvertToNbaPlayOutOfBoundsTurnover(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_out_of_bounds_turnover(self):
-        nba_play = convert_to_nba_play(self.raw_play_out_of_bounds_turnover)
+        nba_play = convert_to_nba_play(self.raw_play_out_of_bounds_turnover, NbaTeam.GSW, NbaTeam.MEM)
         expected_play = OutOfBoundsTurnover(
             play_length=3000,
             play_id=1,

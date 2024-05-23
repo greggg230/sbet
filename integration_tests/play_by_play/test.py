@@ -1,15 +1,15 @@
-import unittest
 import os
-from typing import List
+import unittest
+
 from frozendict import frozendict
+
+from integration_tests.play_by_play.expected_plays import expected_plays
+from sbet.data.historical.models.transform.nba_team import NbaTeam
+from sbet.data.play_by_play.models.transform.game_state import GameState
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.parsing import parse_plays
 from sbet.data.play_by_play.transform import convert_to_nba_play
-from sbet.data.play_by_play.models.transform.game_state import GameState
 from sbet.data.play_by_play.update_game_state import update_game_state
-from integration_tests.play_by_play.expected_plays import expected_plays
-from sbet.data.play_by_play.models.csv.play import Play
-from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 
 
 class TestIntegrationPlayByPlay(unittest.TestCase):
@@ -17,10 +17,10 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
     def setUp(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.file_path = os.path.join(base_dir, 'data', '[2022-05-13]-0042100236-MEM@GSW.csv')
-        self.plays: List[Play] = parse_plays(self.file_path)
+        self.plays = parse_plays(self.file_path)
 
     def test_integration_play_by_play(self):
-        nba_plays: List[NbaPlay] = [convert_to_nba_play(play) for play in self.plays[:len(expected_plays)]]
+        nba_plays = [convert_to_nba_play(play, NbaTeam.GSW, NbaTeam.MEM) for play in self.plays[:len(expected_plays)]]
 
         initial_state = GameState(
             current_period=1,
@@ -34,18 +34,14 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
             away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}),
             home_timeouts=7,
             away_timeouts=7,
+            free_throw_state=None,
             home_team_fouls=0,
             away_team_fouls=0,
             home_team_fouls_in_last_two_minutes=0,
-            away_team_fouls_in_last_two_minutes=0,
-            free_throw_state=None
+            away_team_fouls_in_last_two_minutes=0
         )
 
         current_state = initial_state
-
-        expected: NbaPlay
-        actual: NbaPlay
-        play: Play
 
         for expected, actual, play in zip(expected_plays, nba_plays, self.plays[:len(expected_plays)]):
             with self.subTest(play_id=actual.play_id):

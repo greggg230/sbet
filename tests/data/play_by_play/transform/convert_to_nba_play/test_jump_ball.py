@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import JumpBall
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -87,7 +89,7 @@ class TestConvertToNbaPlayJumpBall(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_jump_ball_home_wins(self):
-        nba_play = convert_to_nba_play(self.raw_play_jump_ball_home_wins)
+        nba_play = convert_to_nba_play(self.raw_play_jump_ball_home_wins, NbaTeam.GSW, NbaTeam.MEM)
         expected_play = JumpBall(
             play_length=3000,
             play_id=1,
@@ -98,7 +100,7 @@ class TestConvertToNbaPlayJumpBall(unittest.TestCase):
         self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_jump_ball_away_wins(self):
-        nba_play = convert_to_nba_play(self.raw_play_jump_ball_away_wins)
+        nba_play = convert_to_nba_play(self.raw_play_jump_ball_away_wins, NbaTeam.GSW, NbaTeam.MEM)
         expected_play = JumpBall(
             play_length=3000,
             play_id=1,

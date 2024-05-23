@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import PeriodEnd
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -47,7 +49,7 @@ class TestConvertToNbaPlayPeriodEnd(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_period_end(self):
-        nba_play = convert_to_nba_play(self.raw_play_period_end)
+        nba_play = convert_to_nba_play(self.raw_play_period_end, NbaTeam.GSW, NbaTeam.MEM)
         expected_play = PeriodEnd(
             play_length=0,
             play_id=1,

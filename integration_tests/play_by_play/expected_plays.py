@@ -71,4 +71,59 @@ expected_plays = [
     Substitution(play_length=11000, play_id=58, home_team_lineup=frozenset({Player("Jordan Poole"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Stephen Curry"), Player("Klay Thompson")}), away_team_lineup=frozenset({Player("Steven Adams"), Player("Tyus Jones"), Player("Jaren Jackson Jr."), Player("Desmond Bane"), Player("Dillon Brooks")})),
     FieldGoalAttempt(play_length=5000, play_id=59, shot_made=False, points=0),
     Rebound(play_length=3000, play_id=60, rebounding_player=Player("Steven Adams"), is_offensive=False),
+    FieldGoalAttempt(play_length=9000, play_id=61, shot_made=False, points=0),
+    Rebound(play_length=2000, play_id=62, rebounding_player=Player("Dillon Brooks"), is_offensive=True),
+    Foul(play_length=5000, play_id=63, committed_by=Player("Stephen Curry"), is_offensive=False, foul_type="personal"),
+    FieldGoalAttempt(play_length=7000, play_id=64, shot_made=True, points=2),
+    OutOfBoundsTurnover(play_length=4000, play_id=65, player=Player("Draymond Green")),
+    FieldGoalAttempt(play_length=9000, play_id=66, shot_made=True, points=3),
+    Steal(play_length=18000, play_id=67, stolen_from=Player("Stephen Curry"), stolen_by=Player("Dillon Brooks")),
+    FieldGoalAttempt(play_length=3000, play_id=68, shot_made=True, points=3),
+    Timeout(play_length=2000, play_id=69, is_home=True),
+    Substitution(
+        play_length=0,
+        play_id=70,
+        home_team_lineup=frozenset({
+            Player("Jordan Poole"),
+            Player("Draymond Green"),
+            Player("Andrew Wiggins"),
+            Player("Stephen Curry"),
+            Player("Klay Thompson")
+        }),
+        away_team_lineup=frozenset({
+            Player("Steven Adams"),
+            Player("Tyus Jones"),
+            Player("Kyle Anderson"),
+            Player("Desmond Bane"),
+            Player("Dillon Brooks")
+        })
+    ),
+    Substitution(
+        play_length=0,
+        play_id=71,
+        home_team_lineup=frozenset({
+            Player("Jordan Poole"),
+            Player("Draymond Green"),
+            Player("Andrew Wiggins"),
+            Player("Stephen Curry"),
+            Player("Klay Thompson")
+        }),
+        away_team_lineup=frozenset({
+            Player("Steven Adams"),
+            Player("Tyus Jones"),
+            Player("Kyle Anderson"),
+            Player("Ziaire Williams"),
+            Player("Dillon Brooks")
+        })
+    ),
+    FieldGoalAttempt(play_length=19000, play_id=72, shot_made=False, points=0),
+    Rebound(play_length=3000, play_id=73, rebounding_player=Player("Kyle Anderson"), is_offensive=False),
+    FieldGoalAttempt(play_length=8000, play_id=74, shot_made=True, points=2),
+    FieldGoalAttempt(play_length=14000, play_id=75, shot_made=True, points=3),
+    FieldGoalAttempt(play_length=12000, play_id=76, shot_made=False, points=0),
+    Rebound(play_length=2000, play_id=77, rebounding_player=Player("Andrew Wiggins"), is_offensive=False),
+    FieldGoalAttempt(play_length=6000, play_id=78, shot_made=False, points=0),
+    Rebound(play_length=2000, play_id=79, rebounding_player=Player("Steven Adams"), is_offensive=False),
+    FieldGoalAttempt(play_length=12000, play_id=80, shot_made=False, points=0),
+
 ]

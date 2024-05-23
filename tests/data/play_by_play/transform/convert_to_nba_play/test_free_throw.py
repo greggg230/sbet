@@ -1,80 +1,71 @@
 import unittest
 from dataclasses import replace
-from frozendict import frozendict
-from sbet.data.play_by_play.models.transform.player import Player
+
+from sbet.data.play_by_play.transform import convert_to_nba_play
+from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import FreeThrow
-from sbet.data.play_by_play.models.transform.game_state import GameState, FreeThrowState
-from sbet.data.play_by_play.update_game_state import update_game_state
+from sbet.data.historical.models.transform.nba_team import NbaTeam
 
 
-class TestUpdateGameStateFreeThrow(unittest.TestCase):
+class TestConvertToNbaPlayFreeThrow(unittest.TestCase):
 
     def setUp(self):
-        self.initial_state = GameState(
-            current_period=1,
-            home_team_has_possession=True,
-            personal_foul_count=frozendict(),
-            ejected_players=frozenset(),
-            home_score=0,
+        self.raw_play_free_throw = Play(
+            game_id=1,
+            data_set="",
+            date="2022-01-01",
+            a1="PlayerA1",
+            a2="PlayerA2",
+            a3="PlayerA3",
+            a4="PlayerA4",
+            a5="PlayerA5",
+            h1="PlayerH1",
+            h2="PlayerH2",
+            h3="PlayerH3",
+            h4="PlayerH4",
+            h5="PlayerH5",
+            period=1,
             away_score=0,
-            milliseconds_remaining_in_period=720000,
-            home_team_lineup=frozenset({Player("H1"), Player("H2"), Player("H3"), Player("H4"), Player("H5")}),
-            away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")}),
-            home_timeouts=7,
-            away_timeouts=7,
-            home_team_fouls=0,
-            away_team_fouls=0,
-            home_team_fouls_in_last_two_minutes=0,
-            away_team_fouls_in_last_two_minutes=0,
-            free_throw_state=None
+            home_score=0,
+            remaining_time="12:00:00",
+            elapsed="0:00:00",
+            play_length="0:00:00",
+            play_id=1,
+            team="GSW",
+            event_type="free throw",
+            assist=None,
+            away=None,
+            home=None,
+            block=None,
+            entered=None,
+            left=None,
+            num=None,
+            opponent=None,
+            outof=None,
+            player="PlayerH1",
+            points=1,
+            possession=None,
+            reason=None,
+            result="made",
+            steal=None,
+            type=None,
+            shot_distance=None,
+            original_x=None,
+            original_y=None,
+            converted_x=None,
+            converted_y=None,
+            description="Free Throw 1 of 1 by PlayerH1"
         )
 
-    def test_free_throw_made(self):
-        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=1, for_home_team=True, shooting_team_gets_possession_after=False))
-        play = FreeThrow(play_length=1000, play_id=3, shot_made=True)
-        updated_state = update_game_state(state, play)
-        self.assertEqual(updated_state.home_score, 1)
-        self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
-        self.assertFalse(updated_state.home_team_has_possession)
-        self.assertIsNone(updated_state.free_throw_state)
+    def test_convert_to_nba_play_free_throw_made(self):
+        nba_play = convert_to_nba_play(self.raw_play_free_throw, NbaTeam.GSW, NbaTeam.MEM)
+        self.assertEqual(nba_play, FreeThrow(play_length=0, play_id=1, shot_made=True))
 
-    def test_free_throw_missed(self):
-        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=1, for_home_team=True, shooting_team_gets_possession_after=False))
-        play = FreeThrow(play_length=1000, play_id=3, shot_made=False)
-        updated_state = update_game_state(state, play)
-        self.assertEqual(updated_state.home_score, 0)
-        self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
-        self.assertFalse(updated_state.home_team_has_possession)
-        self.assertIsNone(updated_state.free_throw_state)
+    def test_convert_to_nba_play_free_throw_missed(self):
+        play = replace(self.raw_play_free_throw, result="missed")
+        nba_play = convert_to_nba_play(play, NbaTeam.GSW, NbaTeam.MEM)
+        self.assertEqual(nba_play, FreeThrow(play_length=0, play_id=1, shot_made=False))
 
-    def test_free_throw_one_of_two(self):
-        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=True, shooting_team_gets_possession_after=False))
-        play = FreeThrow(play_length=1000, play_id=3, shot_made=True)
-        updated_state = update_game_state(state, play)
-        self.assertEqual(updated_state.home_score, 1)
-        self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
-        self.assertTrue(updated_state.home_team_has_possession)
-        self.assertIsNotNone(updated_state.free_throw_state)
-        self.assertEqual(updated_state.free_throw_state.free_throws_remaining, 1)
 
-    def test_free_throw_two_of_two(self):
-        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=True, shooting_team_gets_possession_after=False))
-        play1 = FreeThrow(play_length=1000, play_id=3, shot_made=True)
-        state1 = update_game_state(state, play1)
-        play2 = FreeThrow(play_length=1000, play_id=4, shot_made=True)
-        updated_state = update_game_state(state1, play2)
-        self.assertEqual(updated_state.home_score, 2)
-        self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
-        self.assertFalse(updated_state.home_team_has_possession)
-        self.assertIsNone(updated_state.free_throw_state)
-
-    def test_free_throw_with_no_state(self):
-        play = FreeThrow(play_length=1000, play_id=3, shot_made=True)
-        with self.assertRaises(ValueError):
-            update_game_state(self.initial_state, play)
-
-    def test_free_throw_with_no_remaining_free_throws(self):
-        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=0, for_home_team=True, shooting_team_gets_possession_after=False))
-        play = FreeThrow(play_length=1000, play_id=3, shot_made=True)
-        with self.assertRaises(ValueError):
-            update_game_state(state, play)
+if __name__ == '__main__':
+    unittest.main()

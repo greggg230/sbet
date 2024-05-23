@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.turnover import ShotClockViolation
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -47,7 +49,7 @@ class TestConvertToNbaPlayShotClockViolation(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_shot_clock_violation(self):
-        nba_play = convert_to_nba_play(self.raw_play_shot_clock_violation)
+        nba_play = convert_to_nba_play(self.raw_play_shot_clock_violation, NbaTeam.GSW, NbaTeam.MEM)
         expected_play = ShotClockViolation(
             play_length=3000,
             play_id=1

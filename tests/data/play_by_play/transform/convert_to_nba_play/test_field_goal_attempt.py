@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import FieldGoalAttempt
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -47,7 +49,7 @@ class TestConvertToNbaPlayFieldGoalAttempt(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_field_goal_attempt(self):
-        nba_play = convert_to_nba_play(self.raw_play_field_goal_attempt)
+        nba_play = convert_to_nba_play(self.raw_play_field_goal_attempt, NbaTeam.ATL, NbaTeam.BKN)
         expected_play = FieldGoalAttempt(
             play_length=20000,
             play_id=1,

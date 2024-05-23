@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import Foul
@@ -103,11 +105,11 @@ class TestConvertToNbaPlayFoul(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_foul(self):
-        nba_play = convert_to_nba_play(self.raw_play_foul)
+        nba_play = convert_to_nba_play(self.raw_play_foul, NbaTeam.ATL, NbaTeam.BKN)
         expected_play = Foul(play_length=20000, play_id=1, foul_type="personal", committed_by=Player("H1"), is_offensive=False)
         self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_offensive_foul(self):
-        nba_play = convert_to_nba_play(self.raw_play_offensive_foul)
+        nba_play = convert_to_nba_play(self.raw_play_offensive_foul, NbaTeam.ATL, NbaTeam.BKN)
         expected_play = Foul(play_length=20000, play_id=2, foul_type="offensive", committed_by=Player("H1"), is_offensive=True)
         self.assertEqual(nba_play, expected_play)

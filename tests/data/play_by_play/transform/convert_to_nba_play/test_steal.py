@@ -1,4 +1,6 @@
 import unittest
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.turnover import Steal
 from sbet.data.play_by_play.models.transform.player import Player
@@ -48,7 +50,7 @@ class TestConvertToNbaPlaySteal(unittest.TestCase):
         )
 
     def test_convert_to_nba_play_steal(self):
-        nba_play = convert_to_nba_play(self.raw_play_steal)
+        nba_play = convert_to_nba_play(self.raw_play_steal, NbaTeam.GSW, NbaTeam.MEM)
         self.assertIsInstance(nba_play, Steal)
         self.assertEqual(nba_play.play_length, 9000)
         self.assertEqual(nba_play.play_id, 28)
