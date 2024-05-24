@@ -1,5 +1,6 @@
 from datetime import timedelta
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 from sbet.data.play_by_play.models.transform.plays import (
     FieldGoalAttempt, Foul, JumpBall, PeriodStart, PeriodEnd, Rebound, Substitution, Timeout, FreeThrow
 )
@@ -16,6 +17,12 @@ def parse_play_length(play_length_str: str) -> timedelta:
     return timedelta(hours=time_parts[0], minutes=time_parts[1], seconds=time_parts[2])
 
 
+THREE_POINT_SHOT_TYPES = ["3pt jump shot", "3pt running pull-up jump shot", "3pt pullup jump shot", "3pt step back jump shot"]
+LAYUP_TYPES = ["layup", "cutting layup shot", "driving dunk", "dunk", "cutting finger roll layup shot", "driving layup"]
+TWO_POINT_SHOT_TYPES = [
+    "jump shot", "hook shot", "fadeaway jumper", "floating jump shot", "driving floating jump shot", "driving floating bank jump shot"]
+
+
 def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> NbaPlay:
     play_length = int(parse_play_length(play.play_length).total_seconds() * 1000)
     event_type = play.event_type
@@ -23,16 +30,25 @@ def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> N
     match event_type:
         case "shot":
             shot_made = play.result == "made"
-            points = int(play.points) if shot_made else 0
             shooting_player = Player(play.player)
             assisting_player = Player(play.assist) if play.assist else None
+
+            if play.type in THREE_POINT_SHOT_TYPES:
+                field_goal_type = FieldGoalType.THREE_POINT_SHOT
+            elif play.type in LAYUP_TYPES:
+                field_goal_type = FieldGoalType.LAYUP
+            elif play.type in TWO_POINT_SHOT_TYPES:
+                field_goal_type = FieldGoalType.TWO_POINT_SHOT
+            else:
+                raise ValueError(f"Unexpected shot type: {play.type}")
+
             return FieldGoalAttempt(
                 play_length=play_length,
                 play_id=play.play_id,
                 shot_made=shot_made,
-                points=points,
                 shooting_player=shooting_player,
-                assisting_player=assisting_player
+                assisting_player=assisting_player,
+                type=field_goal_type
             )
 
         case "foul":

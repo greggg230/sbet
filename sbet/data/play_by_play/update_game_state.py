@@ -8,14 +8,21 @@ from sbet.data.play_by_play.models.transform.plays import (
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
 )
-
+from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 
 def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
     remaining_time = game_state.milliseconds_remaining_in_period - play.play_length
     state_with_updated_time = replace(game_state, milliseconds_remaining_in_period=remaining_time)
 
     match play:
-        case FieldGoalAttempt(shot_made=True, points=points):
+        case FieldGoalAttempt(shot_made=True, type=FieldGoalType.LAYUP | FieldGoalType.TWO_POINT_SHOT):
+            points = 2
+            new_home_score = game_state.home_score + points if game_state.home_team_has_possession else game_state.home_score
+            new_away_score = game_state.away_score + points if not game_state.home_team_has_possession else game_state.away_score
+            return replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score, home_team_has_possession=not game_state.home_team_has_possession)
+
+        case FieldGoalAttempt(shot_made=True, type=FieldGoalType.THREE_POINT_SHOT):
+            points = 3
             new_home_score = game_state.home_score + points if game_state.home_team_has_possession else game_state.home_score
             new_away_score = game_state.away_score + points if not game_state.home_team_has_possession else game_state.away_score
             return replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score, home_team_has_possession=not game_state.home_team_has_possession)

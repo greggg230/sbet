@@ -1,12 +1,10 @@
 import unittest
-
 from frozendict import frozendict
-
 from sbet.data.play_by_play.models.transform.game_state import GameState
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.plays import FieldGoalAttempt
 from sbet.data.play_by_play.update_game_state import update_game_state
-
+from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 
 class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
 
@@ -30,14 +28,42 @@ class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
             free_throw_state=None
         )
 
-    def test_field_goal_attempt(self):
+    def test_field_goal_attempt_two_point(self):
         play = FieldGoalAttempt(
             play_length=2000,
             play_id=1,
             shot_made=True,
-            points=2,
             shooting_player=Player("H1"),
-            assisting_player=Player("H2")
+            assisting_player=Player("H2"),
+            type=FieldGoalType.TWO_POINT_SHOT
+        )
+        updated_state = update_game_state(self.initial_state, play)
+        self.assertEqual(updated_state.home_score, 2)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
+        self.assertFalse(updated_state.home_team_has_possession)
+
+    def test_field_goal_attempt_three_point(self):
+        play = FieldGoalAttempt(
+            play_length=2000,
+            play_id=1,
+            shot_made=True,
+            shooting_player=Player("H1"),
+            assisting_player=Player("H2"),
+            type=FieldGoalType.THREE_POINT_SHOT
+        )
+        updated_state = update_game_state(self.initial_state, play)
+        self.assertEqual(updated_state.home_score, 3)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
+        self.assertFalse(updated_state.home_team_has_possession)
+
+    def test_field_goal_attempt_layup(self):
+        play = FieldGoalAttempt(
+            play_length=2000,
+            play_id=1,
+            shot_made=True,
+            shooting_player=Player("H1"),
+            assisting_player=Player("H2"),
+            type=FieldGoalType.LAYUP
         )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 2)

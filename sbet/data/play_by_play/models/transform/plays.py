@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import FrozenSet, Optional
 
+from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.player import Player
 
@@ -8,9 +9,9 @@ from sbet.data.play_by_play.models.transform.player import Player
 @dataclass(frozen=True)
 class FieldGoalAttempt(NbaPlay):
     shot_made: bool
-    points: int
     shooting_player: Player
     assisting_player: Optional[Player]
+    type: FieldGoalType
 
 
 @dataclass(frozen=True)
