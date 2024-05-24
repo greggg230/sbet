@@ -36,6 +36,7 @@ class TestUpdateGameStateFreeThrow(unittest.TestCase):
         self.assertEqual(updated_state.home_score, 1)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
         self.assertIsNone(updated_state.free_throw_state)
+        self.assertFalse(updated_state.home_team_has_possession)
 
     def test_free_throw_missed(self):
         state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=1, for_home_team=True, shooting_team_gets_possession_after=False))
@@ -44,6 +45,27 @@ class TestUpdateGameStateFreeThrow(unittest.TestCase):
         self.assertEqual(updated_state.home_score, 0)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
         self.assertIsNone(updated_state.free_throw_state)
+        self.assertTrue(updated_state.home_team_has_possession)
+
+    def test_free_throw_made_with_more_remaining(self):
+        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=True, shooting_team_gets_possession_after=False))
+        play = FreeThrow(play_length=1000, play_id=3, shot_made=True)
+        updated_state = update_game_state(state, play)
+        self.assertEqual(updated_state.home_score, 1)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
+        self.assertIsNotNone(updated_state.free_throw_state)
+        self.assertEqual(updated_state.free_throw_state.free_throws_remaining, 1)
+        self.assertTrue(updated_state.home_team_has_possession)
+
+    def test_free_throw_missed_with_more_remaining(self):
+        state = replace(self.initial_state, free_throw_state=FreeThrowState(free_throws_remaining=2, for_home_team=True, shooting_team_gets_possession_after=False))
+        play = FreeThrow(play_length=1000, play_id=3, shot_made=False)
+        updated_state = update_game_state(state, play)
+        self.assertEqual(updated_state.home_score, 0)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 719000)
+        self.assertIsNotNone(updated_state.free_throw_state)
+        self.assertEqual(updated_state.free_throw_state.free_throws_remaining, 1)
+        self.assertTrue(updated_state.home_team_has_possession)
 
 
 if __name__ == '__main__':

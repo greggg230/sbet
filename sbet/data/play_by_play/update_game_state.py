@@ -45,7 +45,7 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
             free_throws_remaining = game_state.free_throw_state.free_throws_remaining - 1
             new_free_throw_state = replace(game_state.free_throw_state, free_throws_remaining=free_throws_remaining)
             new_state = replace(state_with_updated_time, home_score=new_home_score, away_score=new_away_score, free_throw_state=new_free_throw_state if free_throws_remaining > 0 else None)
-            if free_throws_remaining == 0:
+            if free_throws_remaining == 0 and shot_made:
                 new_state = replace(new_state, home_team_has_possession=not game_state.free_throw_state.for_home_team)
             return new_state
 
