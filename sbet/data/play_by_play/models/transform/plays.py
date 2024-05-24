@@ -9,6 +9,8 @@ from sbet.data.play_by_play.models.transform.player import Player
 class FieldGoalAttempt(NbaPlay):
     shot_made: bool
     points: int
+    shooting_player: Player
+    assisting_player: Optional[Player]
 
 
 @dataclass(frozen=True)

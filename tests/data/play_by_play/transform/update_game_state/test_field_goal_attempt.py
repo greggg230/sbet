@@ -31,7 +31,14 @@ class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
         )
 
     def test_field_goal_attempt(self):
-        play = FieldGoalAttempt(play_length=2000, play_id=1, shot_made=True, points=2)
+        play = FieldGoalAttempt(
+            play_length=2000,
+            play_id=1,
+            shot_made=True,
+            points=2,
+            shooting_player=Player("H1"),
+            assisting_player=Player("H2")
+        )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 2)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)

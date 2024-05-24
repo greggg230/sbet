@@ -1,9 +1,10 @@
 import unittest
 
-from sbet.data.historical.models import NbaTeam
+from sbet.data.historical.models.transform.nba_team import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.plays import FieldGoalAttempt
 from sbet.data.play_by_play.transform import convert_to_nba_play
+from sbet.data.play_by_play.models.transform.player import Player
 
 
 class TestConvertToNbaPlayFieldGoalAttempt(unittest.TestCase):
@@ -24,7 +25,7 @@ class TestConvertToNbaPlayFieldGoalAttempt(unittest.TestCase):
             play_id=1,
             team="home",
             event_type="shot",
-            assist=None,
+            assist="A2",
             away=None,
             home=None,
             block=None,
@@ -33,7 +34,7 @@ class TestConvertToNbaPlayFieldGoalAttempt(unittest.TestCase):
             num=None,
             opponent=None,
             outof=None,
-            player=None,
+            player="H1",
             points=2,
             possession=None,
             reason=None,
@@ -54,6 +55,8 @@ class TestConvertToNbaPlayFieldGoalAttempt(unittest.TestCase):
             play_length=20000,
             play_id=1,
             shot_made=True,
-            points=2
+            points=2,
+            shooting_player=Player("H1"),
+            assisting_player=Player("A2")
         )
         self.assertEqual(nba_play, expected_play)

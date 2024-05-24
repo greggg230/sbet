@@ -24,11 +24,15 @@ def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> N
         case "shot":
             shot_made = play.result == "made"
             points = int(play.points) if shot_made else 0
+            shooting_player = Player(play.player)
+            assisting_player = Player(play.assist) if play.assist else None
             return FieldGoalAttempt(
                 play_length=play_length,
                 play_id=play.play_id,
                 shot_made=shot_made,
-                points=points
+                points=points,
+                shooting_player=shooting_player,
+                assisting_player=assisting_player
             )
 
         case "foul":
