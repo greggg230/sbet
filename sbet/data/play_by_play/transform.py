@@ -5,7 +5,7 @@ from sbet.data.play_by_play.models.transform.plays import (
     FieldGoalAttempt, Foul, JumpBall, PeriodStart, PeriodEnd, Rebound, Substitution, Timeout, FreeThrow
 )
 from sbet.data.play_by_play.models.transform.turnover import (
-    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
+    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover, TravelingTurnover
 )
 from sbet.data.historical.models.transform.nba_team import NbaTeam
 from sbet.data.play_by_play.models.transform.player import Player
@@ -141,6 +141,12 @@ def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> N
                 return OffensiveFoulTurnover(
                     play_length=play_length,
                     play_id=play.play_id
+                )
+            elif play.type == "traveling":
+                return TravelingTurnover(
+                    play_length=play_length,
+                    play_id=play.play_id,
+                    player=Player(play.player)
                 )
             else:
                 raise ValueError(f"Unexpected turnover type: {play.type}")

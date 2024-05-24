@@ -1,9 +1,10 @@
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, PeriodStart, Foul, JumpBall, Rebound, Timeout, FreeThrow, Substitution
+    FieldGoalAttempt, PeriodStart, Foul, JumpBall, Rebound, Timeout, FreeThrow, Substitution, PeriodEnd
 )
 from sbet.data.play_by_play.models.transform.player import Player
-from sbet.data.play_by_play.models.transform.turnover import OutOfBoundsTurnover, Steal, OffensiveFoulTurnover
+from sbet.data.play_by_play.models.transform.turnover import OutOfBoundsTurnover, Steal, OffensiveFoulTurnover, \
+    Turnover, TravelingTurnover
 
 expected_plays = [
     PeriodStart(
@@ -145,5 +146,177 @@ expected_plays = [
     Steal(play_length=3000, play_id=97, stolen_by=Player("Ziaire Williams"), stolen_from=Player("Damion Lee")),
     FieldGoalAttempt(play_length=3000, play_id=98, shot_made=True, type=FieldGoalType.LAYUP, shooting_player=Player("Ziaire Williams"), assisting_player=None),
     FieldGoalAttempt(play_length=19000, play_id=99, shot_made=False, type=FieldGoalType.THREE_POINT_SHOT, shooting_player=Player("Jordan Poole"), assisting_player=None),
-    Rebound(play_length=3000, play_id=100, rebounding_player=Player("Kevon Looney"), is_offensive=True)
+    Rebound(play_length=3000, play_id=100, rebounding_player=Player("Kevon Looney"), is_offensive=True),
+FieldGoalAttempt(
+        play_length=10000,
+        play_id=101,
+        shot_made=False,
+        shooting_player=Player("Jordan Poole"),
+        assisting_player=None,
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    Rebound(
+        play_length=3000,
+        play_id=102,
+        rebounding_player=Player("Tyus Jones"),
+        is_offensive=False
+    ),
+    FieldGoalAttempt(
+        play_length=7000,
+        play_id=103,
+        shot_made=False,
+        shooting_player=Player("Ziaire Williams"),
+        assisting_player=None,
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    Rebound(
+        play_length=2000,
+        play_id=104,
+        rebounding_player=Player("Kevon Looney"),
+        is_offensive=False
+    ),
+    FieldGoalAttempt(
+        play_length=14000,
+        play_id=105,
+        shot_made=True,
+        shooting_player=Player("Stephen Curry"),
+        assisting_player=None,
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    FieldGoalAttempt(
+        play_length=13000,
+        play_id=106,
+        shot_made=True,
+        shooting_player=Player("Desmond Bane"),
+        assisting_player=Player("Brandon Clarke"),
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    FieldGoalAttempt(
+        play_length=21000,
+        play_id=107,
+        shot_made=False,
+        shooting_player=Player("Stephen Curry"),
+        assisting_player=None,
+        type=FieldGoalType.LAYUP
+    ),
+    Rebound(
+        play_length=3000,
+        play_id=108,
+        rebounding_player=Player("Kevon Looney"),
+        is_offensive=True
+    ),
+    FieldGoalAttempt(
+        play_length=1000,
+        play_id=109,
+        shot_made=True,
+        shooting_player=Player("Damion Lee"),
+        assisting_player=Player("Jordan Poole"),
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    Foul(
+        play_length=16000,
+        play_id=110,
+        committed_by=Player("Kyle Anderson"),
+        is_offensive=True,
+        foul_type="offensive"
+    ),
+    OffensiveFoulTurnover(
+        play_length=0,
+        play_id=111
+    ),
+    Substitution(
+        play_length=0,
+        play_id=112,
+        home_team_lineup=frozenset({
+            Player("Klay Thompson"),
+            Player("Jordan Poole"),
+            Player("Kevon Looney"),
+            Player("Andrew Wiggins"),
+            Player("Damion Lee")
+        }),
+        away_team_lineup=frozenset({
+            Player("Brandon Clarke"),
+            Player("Tyus Jones"),
+            Player("Kyle Anderson"),
+            Player("Ziaire Williams"),
+            Player("Desmond Bane")
+        })
+    ),
+    Substitution(
+        play_length=0,
+        play_id=113,
+        home_team_lineup=frozenset({
+            Player("Klay Thompson"),
+            Player("Jordan Poole"),
+            Player("Kevon Looney"),
+            Player("Andrew Wiggins"),
+            Player("Damion Lee")
+        }),
+        away_team_lineup=frozenset({
+            Player("Brandon Clarke"),
+            Player("De'Anthony Melton"),
+            Player("Kyle Anderson"),
+            Player("Ziaire Williams"),
+            Player("Desmond Bane")
+        })
+    ),
+    TravelingTurnover(
+        play_length=15000,
+        play_id=114,
+        player=Player("Andrew Wiggins")
+    ),
+    FieldGoalAttempt(
+        play_length=7000,
+        play_id=115,
+        shot_made=False,
+        shooting_player=Player("Brandon Clarke"),
+        assisting_player=None,
+        type=FieldGoalType.LAYUP
+    ),
+    Rebound(
+        play_length=3000,
+        play_id=116,
+        rebounding_player=Player("Kevon Looney"),
+        is_offensive=False
+    ),
+    FieldGoalAttempt(
+        play_length=13000,
+        play_id=117,
+        shot_made=True,
+        shooting_player=Player("Klay Thompson"),
+        assisting_player=None,
+        type=FieldGoalType.TWO_POINT_SHOT
+    ),
+    FieldGoalAttempt(
+        play_length=14000,
+        play_id=118,
+        shot_made=True,
+        shooting_player=Player("De'Anthony Melton"),
+        assisting_player=Player("Brandon Clarke"),
+        type=FieldGoalType.THREE_POINT_SHOT
+    ),
+    PeriodEnd(
+        play_length=1000,
+        play_id=119,
+        period_number=1
+    ),
+    PeriodStart(
+        play_length=0,
+        play_id=120,
+        period_number=2,
+        home_team_lineup=frozenset({
+            Player("Jordan Poole"),
+            Player("Nemanja Bjelica"),
+            Player("Draymond Green"),
+            Player("Klay Thompson"),
+            Player("Damion Lee")
+        }),
+        away_team_lineup=frozenset({
+            Player("Jaren Jackson Jr."),
+            Player("Brandon Clarke"),
+            Player("De'Anthony Melton"),
+            Player("Desmond Bane"),
+            Player("Ziaire Williams")
+        })
+    )
 ]

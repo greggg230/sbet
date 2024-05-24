@@ -1,12 +1,11 @@
 from dataclasses import replace
-
 from sbet.data.play_by_play.models.transform.game_state import GameState, FreeThrowState
 from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.plays import (
     FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, Foul, JumpBall, Rebound, FreeThrow
 )
 from sbet.data.play_by_play.models.transform.turnover import (
-    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover
+    Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover, TravelingTurnover
 )
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 
@@ -66,7 +65,7 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
             return replace(state_with_updated_time, current_period=period, milliseconds_remaining_in_period=720000, home_team_lineup=home_lineup, away_team_lineup=away_lineup)
 
         case PeriodEnd(period_number=period):
-            return replace(state_with_updated_time, current_period=period + 1, milliseconds_remaining_in_period=0)
+            return replace(state_with_updated_time, milliseconds_remaining_in_period=0)
 
         case Timeout(is_home=True):
             return replace(state_with_updated_time, home_timeouts=game_state.home_timeouts - 1)
@@ -80,7 +79,7 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
         case Rebound(is_offensive=False):
             return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
-        case Steal() | ShotClockViolation() | OutOfBoundsTurnover() | OffensiveFoulTurnover():
+        case Steal() | ShotClockViolation() | OutOfBoundsTurnover() | OffensiveFoulTurnover() | TravelingTurnover():
             return replace(state_with_updated_time, home_team_has_possession=not game_state.home_team_has_possession)
 
         case Substitution(home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup):

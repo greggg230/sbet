@@ -30,3 +30,8 @@ class OutOfBoundsTurnover(Turnover):
 @dataclass(frozen=True)
 class OffensiveFoulTurnover(NbaPlay):
     pass
+
+
+@dataclass(frozen=True)
+class TravelingTurnover(Turnover):
+    player: Player
