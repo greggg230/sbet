@@ -5,6 +5,7 @@ from frozendict import frozendict
 
 from sbet.data.play_by_play.models.transform.free_throw_state import FreeThrowState
 from sbet.data.play_by_play.models.transform.player import Player
+from sbet.data.play_by_play.models.transform.plays import FieldGoalAttempt
 
 
 @dataclass(frozen=True)
@@ -25,3 +26,4 @@ class GameState:
     away_team_fouls: int
     home_team_fouls_in_last_two_minutes: int
     away_team_fouls_in_last_two_minutes: int
+    last_field_goal_attempt: Optional[FieldGoalAttempt] = None

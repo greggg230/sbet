@@ -1,11 +1,11 @@
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sbet.data.historical.models import NbaGame, NbaMoneyLineBettingOpportunity, NbaTeam
 from sbet.data.historical.models import Game, Team, MoneyLineBettingOdds
 
 
 def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame]:
     team_id_to_abbreviation: Dict[int, str] = {team.team_id: team.abbreviation for team in teams}
-    game_pairs: Dict[int, Dict[str, Game]] = {}
+    game_pairs: Dict[int, Dict[str, Optional[Game]]] = {}
 
     for game in games:
         if game.game_id not in game_pairs:

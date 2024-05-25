@@ -12,6 +12,7 @@ class FieldGoalAttempt(NbaPlay):
     shooting_player: Player
     assisting_player: Optional[Player]
     type: FieldGoalType
+    was_fouled: bool
 
 
 @dataclass(frozen=True)
@@ -35,13 +36,6 @@ class PeriodEnd(NbaPlay):
 @dataclass(frozen=True)
 class Timeout(NbaPlay):
     is_home: bool
-
-
-@dataclass(frozen=True)
-class Foul(NbaPlay):
-    foul_type: str
-    committed_by: Player
-    is_offensive: bool
 
 
 @dataclass(frozen=True)

@@ -1,7 +1,9 @@
 import unittest
+from dataclasses import replace
 
 from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.plays import Substitution
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.transform.player import Player
@@ -49,8 +51,17 @@ class TestConvertToNbaPlaySubstitution(unittest.TestCase):
             description="Substitution H6 in, H5 out"
         )
 
+        self.game = Game(
+            game_id=1,
+            date="2023-01-01",
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_substitution(self):
-        nba_play = convert_to_nba_play(self.raw_play_substitution, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_substitution])
+        nba_play = convert_to_nba_play(self.raw_play_substitution, self.game)
         expected_play = Substitution(
             play_length=3000,
             play_id=1,
@@ -58,3 +69,7 @@ class TestConvertToNbaPlaySubstitution(unittest.TestCase):
             away_team_lineup=frozenset({Player("A1"), Player("A2"), Player("A3"), Player("A4"), Player("A5")})
         )
         self.assertEqual(nba_play, expected_play)
+
+
+if __name__ == '__main__':
+    unittest.main()

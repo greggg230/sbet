@@ -1,15 +1,18 @@
 from datetime import timedelta
+
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
+from sbet.data.play_by_play.models.transform.fouls import OffensiveFoul, PersonalFoul, ShootingFoul, TechnicalFoul, \
+    FlagrantFoul
+from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
+from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, Foul, JumpBall, PeriodStart, PeriodEnd, Rebound, Substitution, Timeout, FreeThrow
+    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, JumpBall, Rebound, FreeThrow
 )
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover, TravelingTurnover
 )
-from sbet.data.historical.models.transform.nba_team import NbaTeam
-from sbet.data.play_by_play.models.transform.player import Player
-from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 
 
 def parse_play_length(play_length_str: str) -> timedelta:
@@ -23,24 +26,65 @@ TWO_POINT_SHOT_TYPES = [
     "jump shot", "hook shot", "fadeaway jumper", "floating jump shot", "driving floating jump shot", "driving floating bank jump shot"]
 
 
-def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> NbaPlay:
+def determine_field_goal_type_and_result(play: Play) -> (FieldGoalType, bool):
+    if play.type in THREE_POINT_SHOT_TYPES:
+        field_goal_type = FieldGoalType.THREE_POINT_SHOT
+    elif play.type in LAYUP_TYPES:
+        field_goal_type = FieldGoalType.LAYUP
+    elif play.type in TWO_POINT_SHOT_TYPES:
+        field_goal_type = FieldGoalType.TWO_POINT_SHOT
+    else:
+        raise ValueError(f"Unexpected shot type: {play.type}")
+
+    shot_made = play.result == "made"
+    return field_goal_type, shot_made
+
+
+def next_play_is_foul(plays: list[Play], play_index: int) -> bool:
+    if play_index + 1 < len(plays):
+        next_play = plays[play_index + 1]
+        return (
+            next_play.event_type == "foul" and
+            next_play.type == "shooting" and
+            next_play.play_length == "0:00:00"
+        )
+    return False
+
+
+def find_previous_shot(play_index: int, plays: list[Play]) -> (FieldGoalType, bool):
+    if play_index == 0:
+        return None, False
+
+    previous_play = plays[play_index - 1]
+
+    if previous_play.event_type != "shot":
+        return None, False
+
+    return determine_field_goal_type_and_result(previous_play)
+
+
+def find_next_free_throw_type(play_index: int, plays: list[Play]) -> FieldGoalType:
+    for i in range(play_index + 1, len(plays)):
+        if plays[i].event_type == "free throw":
+            if plays[i].type == "free throw 1/2":
+                return FieldGoalType.TWO_POINT_SHOT
+            elif plays[i].type == "free throw 1/3":
+                return FieldGoalType.THREE_POINT_SHOT
+    return FieldGoalType.TWO_POINT_SHOT  # Defaulting to two-point shot if no free throw type found
+
+
+def convert_to_nba_play(play: Play, game: Game) -> NbaPlay:
     play_length = int(parse_play_length(play.play_length).total_seconds() * 1000)
     event_type = play.event_type
+    plays = game.plays
+    play_index = plays.index(play)
 
     match event_type:
         case "shot":
-            shot_made = play.result == "made"
+            field_goal_type, shot_made = determine_field_goal_type_and_result(play)
             shooting_player = Player(play.player)
             assisting_player = Player(play.assist) if play.assist else None
-
-            if play.type in THREE_POINT_SHOT_TYPES:
-                field_goal_type = FieldGoalType.THREE_POINT_SHOT
-            elif play.type in LAYUP_TYPES:
-                field_goal_type = FieldGoalType.LAYUP
-            elif play.type in TWO_POINT_SHOT_TYPES:
-                field_goal_type = FieldGoalType.TWO_POINT_SHOT
-            else:
-                raise ValueError(f"Unexpected shot type: {play.type}")
+            was_fouled = next_play_is_foul(plays, play_index)
 
             return FieldGoalAttempt(
                 play_length=play_length,
@@ -48,17 +92,57 @@ def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> N
                 shot_made=shot_made,
                 shooting_player=shooting_player,
                 assisting_player=assisting_player,
-                type=field_goal_type
+                type=field_goal_type,
+                was_fouled=was_fouled
             )
 
         case "foul":
-            return Foul(
-                play_length=play_length,
-                play_id=play.play_id,
-                foul_type=play.type,
-                committed_by=Player(play.player),
-                is_offensive=play.type == "offensive"
-            )
+            fouler = Player(play.player)
+
+            match play.type:
+                case "personal" | "loose ball":
+                    return PersonalFoul(
+                        play_length=play_length,
+                        play_id=play.play_id,
+                        fouling_player=fouler
+                    )
+                case "offensive":
+                    return OffensiveFoul(
+                        play_length=play_length,
+                        play_id=play.play_id,
+                        fouling_player=fouler
+                    )
+                case "shooting":
+                    previous_shot_type, shot_made = find_previous_shot(play_index, plays)
+                    if previous_shot_type:
+                        field_goal_type = previous_shot_type
+                    else:
+                        field_goal_type = find_next_free_throw_type(play_index, plays)
+
+                    return ShootingFoul(
+                        play_length=play_length,
+                        play_id=play.play_id,
+                        fouling_player=fouler,
+                        field_goal_type=field_goal_type,
+                        field_goal_made=shot_made
+                    )
+                case "technical":
+                    is_home_team = play.team == game.home_team.value
+                    fouler = Player(play.player) if play.player else None
+                    return TechnicalFoul(
+                        play_length=play_length,
+                        play_id=play.play_id,
+                        fouling_player=fouler,
+                        is_home_team=is_home_team
+                    )
+                case "flagrant":
+                    return FlagrantFoul(
+                        play_length=play_length,
+                        play_id=play.play_id,
+                        fouling_player=fouler
+                    )
+                case _:
+                    raise ValueError(f"Unexpected foul type: {play.type}")
 
         case "jump ball":
             did_home_team_win = play.player == play.home
@@ -111,7 +195,7 @@ def convert_to_nba_play(play: Play, home_team: NbaTeam, away_team: NbaTeam) -> N
             )
 
         case "timeout":
-            is_home = play.team == home_team.value
+            is_home = play.team == game.home_team.value
             return Timeout(
                 play_length=play_length,
                 play_id=play.play_id,

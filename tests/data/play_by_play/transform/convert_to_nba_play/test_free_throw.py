@@ -3,6 +3,7 @@ from dataclasses import replace
 
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.plays import FreeThrow
 from sbet.data.historical.models.transform.nba_team import NbaTeam
 
@@ -57,13 +58,23 @@ class TestConvertToNbaPlayFreeThrow(unittest.TestCase):
             description="Free Throw 1 of 1 by PlayerH1"
         )
 
+        self.game = Game(
+            game_id=1,
+            date="2022-01-01",
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_free_throw_made(self):
-        nba_play = convert_to_nba_play(self.raw_play_free_throw, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_free_throw])
+        nba_play = convert_to_nba_play(self.raw_play_free_throw, self.game)
         self.assertEqual(nba_play, FreeThrow(play_length=0, play_id=1, shot_made=True))
 
     def test_convert_to_nba_play_free_throw_missed(self):
         play = replace(self.raw_play_free_throw, result="missed")
-        nba_play = convert_to_nba_play(play, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[play])
+        nba_play = convert_to_nba_play(play, self.game)
         self.assertEqual(nba_play, FreeThrow(play_length=0, play_id=1, shot_made=False))
 
 

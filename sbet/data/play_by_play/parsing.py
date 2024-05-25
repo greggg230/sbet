@@ -1,6 +1,7 @@
 import csv
 from typing import List
 
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.csv.play import Play
 
@@ -61,7 +62,7 @@ def parse_plays(csv_path: str) -> List[Play]:
     return plays
 
 
-def parse_game(csv_path: str, game_id: str, date: str, home_team: str, away_team: str) -> Game:
+def parse_game(csv_path: str, game_id: int, date: str, home_team: NbaTeam, away_team: NbaTeam) -> Game:
     plays = parse_plays(csv_path)
     return Game(
         game_id=game_id,

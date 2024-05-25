@@ -1,6 +1,7 @@
 import unittest
-from sbet.data.historical.models.transform.nba_team import NbaTeam
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.turnover import TravelingTurnover
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.transform import convert_to_nba_play
@@ -47,9 +48,16 @@ class TestConvertToNbaPlayTravelingTurnover(unittest.TestCase):
             converted_y=None,
             description="Traveling turnover"
         )
+        self.game = Game(
+            game_id=1,
+            date="2023-01-01",
+            home_team=NbaTeam.ATL,
+            away_team=NbaTeam.BKN,
+            plays=[self.raw_play_traveling_turnover]
+        )
 
     def test_convert_to_nba_play_traveling_turnover(self):
-        nba_play = convert_to_nba_play(self.raw_play_traveling_turnover, NbaTeam.ATL, NbaTeam.BKN)
+        nba_play = convert_to_nba_play(self.raw_play_traveling_turnover, self.game)
         expected_play = TravelingTurnover(
             play_length=20000,
             play_id=1,

@@ -2,27 +2,27 @@ import unittest
 import os
 from frozendict import frozendict
 from sbet.data.play_by_play.models.transform.player import Player
-from sbet.data.play_by_play.parsing import parse_plays
+from sbet.data.play_by_play.parsing import parse_plays, parse_game
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.transform.game_state import GameState
 from sbet.data.historical.models.transform.nba_team import NbaTeam
 from sbet.data.play_by_play.update_game_state import update_game_state
 from integration_tests.play_by_play.expected_plays import expected_plays
 
+
 class TestIntegrationPlayByPlay(unittest.TestCase):
 
     def setUp(self):
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.file_path = os.path.join(base_dir, 'data', '[2022-05-13]-0042100236-MEM@GSW.csv')
-        self.plays = parse_plays(self.file_path)
+        self.game = parse_game(self.file_path, 1, "2022-05-13", NbaTeam.GSW, NbaTeam.MEM)
+        self.plays = self.game.plays
         self.consistency_exceptions = {
             91: ["lineup"]  # The lineup data for this row doesn't seem to take into account the substitutions.
         }
 
     def test_integration_play_by_play(self):
-        home_team = NbaTeam.GSW
-        away_team = NbaTeam.MEM
-        nba_plays = [convert_to_nba_play(play, home_team, away_team) for play in self.plays[:len(expected_plays)]]
+        nba_plays = [convert_to_nba_play(play, self.game) for play in self.plays[:len(expected_plays)]]
 
         initial_state = GameState(
             current_period=1,
@@ -51,6 +51,9 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
 
                 # Update game state
                 current_state = update_game_state(current_state, actual)
+
+                if actual.play_id > 122:
+                    1 + 1
 
                 # Consistency checks
                 exceptions = self.consistency_exceptions.get(actual.play_id, [])

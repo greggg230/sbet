@@ -35,7 +35,8 @@ class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
             shot_made=True,
             shooting_player=Player("H1"),
             assisting_player=Player("H2"),
-            type=FieldGoalType.TWO_POINT_SHOT
+            type=FieldGoalType.TWO_POINT_SHOT,
+            was_fouled=False
         )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 2)
@@ -45,11 +46,12 @@ class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
     def test_field_goal_attempt_three_point(self):
         play = FieldGoalAttempt(
             play_length=2000,
-            play_id=1,
+            play_id=2,
             shot_made=True,
             shooting_player=Player("H1"),
             assisting_player=Player("H2"),
-            type=FieldGoalType.THREE_POINT_SHOT
+            type=FieldGoalType.THREE_POINT_SHOT,
+            was_fouled=False
         )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 3)
@@ -59,16 +61,32 @@ class TestUpdateGameStateFieldGoalAttempt(unittest.TestCase):
     def test_field_goal_attempt_layup(self):
         play = FieldGoalAttempt(
             play_length=2000,
-            play_id=1,
+            play_id=3,
             shot_made=True,
             shooting_player=Player("H1"),
             assisting_player=Player("H2"),
-            type=FieldGoalType.LAYUP
+            type=FieldGoalType.LAYUP,
+            was_fouled=False
         )
         updated_state = update_game_state(self.initial_state, play)
         self.assertEqual(updated_state.home_score, 2)
         self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
         self.assertFalse(updated_state.home_team_has_possession)
+
+    def test_field_goal_attempt_with_foul(self):
+        play = FieldGoalAttempt(
+            play_length=2000,
+            play_id=4,
+            shot_made=True,
+            shooting_player=Player("H1"),
+            assisting_player=Player("H2"),
+            type=FieldGoalType.TWO_POINT_SHOT,
+            was_fouled=True
+        )
+        updated_state = update_game_state(self.initial_state, play)
+        self.assertEqual(updated_state.home_score, 2)
+        self.assertEqual(updated_state.milliseconds_remaining_in_period, 718000)
+        self.assertTrue(updated_state.home_team_has_possession)
 
 
 if __name__ == '__main__':

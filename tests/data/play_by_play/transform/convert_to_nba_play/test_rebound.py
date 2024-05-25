@@ -1,7 +1,9 @@
 import unittest
+from dataclasses import replace
 
 from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.plays import Rebound
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.transform.player import Player
@@ -127,26 +129,47 @@ class TestConvertToNbaPlayRebound(unittest.TestCase):
             description='Looney REBOUND (Off:2 Def:2)'
         )
 
+        self.game = Game(
+            game_id=42100236,
+            date='2022-05-13',
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_offensive_rebound(self):
-        nba_play = convert_to_nba_play(self.raw_play_offensive_rebound, NbaTeam.GSW, NbaTeam.MEM)
-        self.assertIsInstance(nba_play, Rebound)
-        self.assertEqual(nba_play.play_length, 2000)
-        self.assertEqual(nba_play.play_id, 41)
-        self.assertEqual(nba_play.rebounding_player, Player("Kevon Looney"))
-        self.assertTrue(nba_play.is_offensive)
+        self.game = replace(self.game, plays=[self.raw_play_offensive_rebound])
+        nba_play = convert_to_nba_play(self.raw_play_offensive_rebound, self.game)
+        expected_play = Rebound(
+            play_length=2000,
+            play_id=41,
+            rebounding_player=Player("Kevon Looney"),
+            is_offensive=True
+        )
+        self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_team_rebound(self):
-        nba_play = convert_to_nba_play(self.raw_play_team_rebound, NbaTeam.GSW, NbaTeam.MEM)
-        self.assertIsInstance(nba_play, Rebound)
-        self.assertEqual(nba_play.play_length, 0)
-        self.assertEqual(nba_play.play_id, 49)
-        self.assertIsNone(nba_play.rebounding_player)
-        self.assertTrue(nba_play.is_offensive)
+        self.game = replace(self.game, plays=[self.raw_play_team_rebound])
+        nba_play = convert_to_nba_play(self.raw_play_team_rebound, self.game)
+        expected_play = Rebound(
+            play_length=0,
+            play_id=49,
+            rebounding_player=None,
+            is_offensive=True
+        )
+        self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_defensive_rebound(self):
-        nba_play = convert_to_nba_play(self.raw_play_defensive_rebound, NbaTeam.GSW, NbaTeam.MEM)
-        self.assertIsInstance(nba_play, Rebound)
-        self.assertEqual(nba_play.play_length, 2000)
-        self.assertEqual(nba_play.play_id, 45)
-        self.assertEqual(nba_play.rebounding_player, Player("Kevon Looney"))
-        self.assertFalse(nba_play.is_offensive)
+        self.game = replace(self.game, plays=[self.raw_play_defensive_rebound])
+        nba_play = convert_to_nba_play(self.raw_play_defensive_rebound, self.game)
+        expected_play = Rebound(
+            play_length=2000,
+            play_id=45,
+            rebounding_player=Player("Kevon Looney"),
+            is_offensive=False
+        )
+        self.assertEqual(nba_play, expected_play)
+
+
+if __name__ == '__main__':
+    unittest.main()

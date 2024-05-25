@@ -1,7 +1,9 @@
 import unittest
+from dataclasses import replace
 
 from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.plays import PeriodStart
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.transform.player import Player
@@ -49,8 +51,17 @@ class TestConvertToNbaPlayPeriodStart(unittest.TestCase):
             description="Start of period"
         )
 
+        self.game = Game(
+            game_id=1,
+            date="2022-05-13",
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_period_start(self):
-        nba_play = convert_to_nba_play(self.raw_play_period_start, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_period_start])
+        nba_play = convert_to_nba_play(self.raw_play_period_start, self.game)
         expected_play = PeriodStart(
             play_length=0,
             play_id=1,
@@ -71,3 +82,7 @@ class TestConvertToNbaPlayPeriodStart(unittest.TestCase):
             })
         )
         self.assertEqual(nba_play, expected_play)
+
+
+if __name__ == '__main__':
+    unittest.main()

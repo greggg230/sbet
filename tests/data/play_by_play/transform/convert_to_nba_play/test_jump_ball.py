@@ -1,7 +1,9 @@
 import unittest
+from dataclasses import replace
 
 from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.plays import JumpBall
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.transform.player import Player
@@ -88,8 +90,17 @@ class TestConvertToNbaPlayJumpBall(unittest.TestCase):
             description="Jump Ball H1 vs. A1: Tip to A1"
         )
 
+        self.game = Game(
+            game_id=1,
+            date="2023-01-01",
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_jump_ball_home_wins(self):
-        nba_play = convert_to_nba_play(self.raw_play_jump_ball_home_wins, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_jump_ball_home_wins])
+        nba_play = convert_to_nba_play(self.raw_play_jump_ball_home_wins, self.game)
         expected_play = JumpBall(
             play_length=3000,
             play_id=1,
@@ -100,7 +111,8 @@ class TestConvertToNbaPlayJumpBall(unittest.TestCase):
         self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_jump_ball_away_wins(self):
-        nba_play = convert_to_nba_play(self.raw_play_jump_ball_away_wins, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_jump_ball_away_wins])
+        nba_play = convert_to_nba_play(self.raw_play_jump_ball_away_wins, self.game)
         expected_play = JumpBall(
             play_length=3000,
             play_id=1,
@@ -109,3 +121,7 @@ class TestConvertToNbaPlayJumpBall(unittest.TestCase):
             did_home_team_win=False
         )
         self.assertEqual(nba_play, expected_play)
+
+
+if __name__ == '__main__':
+    unittest.main()

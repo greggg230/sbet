@@ -1,7 +1,10 @@
 import unittest
-from sbet.data.historical.models.transform.nba_team import NbaTeam
-from sbet.data.play_by_play.models.transform.plays import Timeout
+from dataclasses import replace
+
+from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
+from sbet.data.play_by_play.models.transform.plays import Timeout
 from sbet.data.play_by_play.transform import convert_to_nba_play
 
 
@@ -9,9 +12,7 @@ class TestConvertToNbaPlayTimeout(unittest.TestCase):
     def setUp(self):
         self.home_team = NbaTeam.GSW
         self.away_team = NbaTeam.MEM
-
-    def test_convert_to_nba_play_timeout_home(self):
-        raw_play = Play(
+        self.raw_play = Play(
             game_id=42100236, data_set="2021-22 Playoffs", date="2022-05-13",
             a1="Steven Adams", a2="Tyus Jones", a3="Jaren Jackson Jr.", a4="Desmond Bane", a5="Dillon Brooks",
             h1="Kevon Looney", h2="Draymond Green", h3="Andrew Wiggins", h4="Stephen Curry", h5="Klay Thompson",
@@ -22,7 +23,16 @@ class TestConvertToNbaPlayTimeout(unittest.TestCase):
             shot_distance=None, original_x=None, original_y=None, converted_x=None, converted_y=None,
             description="Timeout: Golden State Warriors"
         )
-        nba_play = convert_to_nba_play(raw_play, self.home_team, self.away_team)
+        self.game = Game(
+            game_id=42100236,
+            date="2022-05-13",
+            home_team=self.home_team,
+            away_team=self.away_team,
+            plays=[self.raw_play]
+        )
+
+    def test_convert_to_nba_play_timeout_home(self):
+        nba_play = convert_to_nba_play(self.raw_play, self.game)
         expected_play = Timeout(play_length=15000, play_id=1, is_home=True)
         self.assertEqual(nba_play, expected_play)
 
@@ -38,7 +48,8 @@ class TestConvertToNbaPlayTimeout(unittest.TestCase):
             shot_distance=None, original_x=None, original_y=None, converted_x=None, converted_y=None,
             description="Timeout: Memphis Grizzlies"
         )
-        nba_play = convert_to_nba_play(raw_play, self.home_team, self.away_team)
+        another_game = replace(self.game, plays=[raw_play])
+        nba_play = convert_to_nba_play(raw_play, another_game)
         expected_play = Timeout(play_length=15000, play_id=2, is_home=False)
         self.assertEqual(nba_play, expected_play)
 

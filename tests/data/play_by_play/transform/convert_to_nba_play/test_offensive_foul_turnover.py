@@ -1,7 +1,9 @@
 import unittest
+from dataclasses import replace
 
 from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.models.csv.play import Play
+from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.transform.turnover import OffensiveFoulTurnover
 from sbet.data.play_by_play.transform import convert_to_nba_play
 
@@ -48,8 +50,17 @@ class TestConvertToNbaPlayOffensiveFoulTurnover(unittest.TestCase):
             description='Looney Offensive Foul Turnover (P1.T1)'
         )
 
+        self.game = Game(
+            game_id=42100236,
+            date='2022-05-13',
+            home_team=NbaTeam.GSW,
+            away_team=NbaTeam.MEM,
+            plays=[]
+        )
+
     def test_convert_to_nba_play_offensive_foul_turnover(self):
-        nba_play = convert_to_nba_play(self.raw_play_offensive_foul_turnover, NbaTeam.GSW, NbaTeam.MEM)
+        self.game = replace(self.game, plays=[self.raw_play_offensive_foul_turnover])
+        nba_play = convert_to_nba_play(self.raw_play_offensive_foul_turnover, self.game)
         self.assertIsInstance(nba_play, OffensiveFoulTurnover)
         self.assertEqual(nba_play.play_length, 0)
         self.assertEqual(nba_play.play_id, 21)
