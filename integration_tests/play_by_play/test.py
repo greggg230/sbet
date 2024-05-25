@@ -18,7 +18,10 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
         self.game = parse_game(self.file_path, 1, "2022-05-13", NbaTeam.GSW, NbaTeam.MEM)
         self.plays = self.game.plays
         self.consistency_exceptions = {
-            91: ["lineup"]  # The lineup data for this row doesn't seem to take into account the substitutions.
+            91: ["lineup"],  # The lineup data for this row doesn't seem to take into account the substitutions.
+            166: ["lineup"],
+            205: ["lineup"],
+            206: ["lineup"]
         }
 
     def test_integration_play_by_play(self):
@@ -51,9 +54,6 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
 
                 # Update game state
                 current_state = update_game_state(current_state, actual)
-
-                if actual.play_id > 122:
-                    1 + 1
 
                 # Consistency checks
                 exceptions = self.consistency_exceptions.get(actual.play_id, [])

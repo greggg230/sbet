@@ -2,14 +2,14 @@ from dataclasses import replace
 from sbet.data.play_by_play.models.transform.game_state import GameState, FreeThrowState
 from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, JumpBall, Rebound, FreeThrow
+    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, JumpBall, Rebound, FreeThrow, Unknown
 )
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover, TravelingTurnover
 )
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 from sbet.data.play_by_play.models.transform.fouls import (
-    OffensiveFoul, PersonalFoul, ShootingFoul, TechnicalFoul, FlagrantFoul
+    OffensiveFoul, PersonalFoul, ShootingFoul, TechnicalFoul, FlagrantFoul, DoubleTechnicalFoul
 )
 from sbet.data.play_by_play.models.csv.game import Game
 
@@ -144,6 +144,9 @@ def update_game_state(game_state: GameState, play: NbaPlay) -> GameState:
 
         case Substitution(home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup):
             return replace(state_with_updated_time, home_team_lineup=new_home_lineup, away_team_lineup=new_away_lineup)
+
+        case Unknown() | DoubleTechnicalFoul():
+            return state_with_updated_time
 
         case _:
             raise ValueError(f"Unrecognized play type: {play}")

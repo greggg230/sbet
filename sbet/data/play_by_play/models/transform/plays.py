@@ -54,3 +54,8 @@ class Rebound(NbaPlay):
 @dataclass(frozen=True)
 class FreeThrow(NbaPlay):
     shot_made: bool
+
+
+@dataclass(frozen=True)
+class Unknown(NbaPlay):
+    pass

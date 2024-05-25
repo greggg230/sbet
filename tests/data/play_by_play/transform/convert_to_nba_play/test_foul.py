@@ -5,7 +5,8 @@ from sbet.data.historical.models import NbaTeam
 from sbet.data.play_by_play.transform import convert_to_nba_play
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.csv.game import Game
-from sbet.data.play_by_play.models.transform.fouls import PersonalFoul, OffensiveFoul, ShootingFoul, TechnicalFoul, FlagrantFoul
+from sbet.data.play_by_play.models.transform.fouls import PersonalFoul, OffensiveFoul, ShootingFoul, TechnicalFoul, \
+    FlagrantFoul, DoubleTechnicalFoul
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 
@@ -102,10 +103,17 @@ class TestConvertToNbaPlayFoul(unittest.TestCase):
         self.assertEqual(nba_play, expected_play)
 
     def test_convert_to_nba_play_flagrant_foul(self):
-        flagrant_foul_play = replace(self.raw_play_foul, type="flagrant", play_id=5)
+        flagrant_foul_play = replace(self.raw_play_foul, type="flagrant-1", play_id=5)
         self.game = replace(self.game, plays=[flagrant_foul_play])
         nba_play = convert_to_nba_play(flagrant_foul_play, self.game)
         expected_play = FlagrantFoul(play_length=20000, play_id=5, fouling_player=Player("H1"))
+        self.assertEqual(nba_play, expected_play)
+
+    def test_convert_to_nba_play_double_technical(self):
+        double_technical_play = replace(self.raw_play_foul, event_type="technical foul", type="double technical")
+        self.game = replace(self.game, plays=[double_technical_play])
+        nba_play = convert_to_nba_play(double_technical_play, self.game)
+        expected_play = DoubleTechnicalFoul(play_length=20000, play_id=1)
         self.assertEqual(nba_play, expected_play)
 
 

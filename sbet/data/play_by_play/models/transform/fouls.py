@@ -38,5 +38,10 @@ class TechnicalFoul(Foul):
 
 
 @dataclass(frozen=True)
+class DoubleTechnicalFoul(Foul):
+    pass
+
+
+@dataclass(frozen=True)
 class FlagrantFoul(Foul):
     fouling_player: Player

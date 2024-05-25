@@ -4,11 +4,11 @@ from sbet.data.play_by_play.models.csv.game import Game
 from sbet.data.play_by_play.models.csv.play import Play
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
 from sbet.data.play_by_play.models.transform.fouls import OffensiveFoul, PersonalFoul, ShootingFoul, TechnicalFoul, \
-    FlagrantFoul
+    FlagrantFoul, DoubleTechnicalFoul
 from sbet.data.play_by_play.models.transform.nba_play import NbaPlay
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, JumpBall, Rebound, FreeThrow
+    FieldGoalAttempt, Substitution, PeriodStart, PeriodEnd, Timeout, JumpBall, Rebound, FreeThrow, Unknown
 )
 from sbet.data.play_by_play.models.transform.turnover import (
     Steal, ShotClockViolation, OutOfBoundsTurnover, OffensiveFoulTurnover, TravelingTurnover
@@ -135,7 +135,7 @@ def convert_to_nba_play(play: Play, game: Game) -> NbaPlay:
                         fouling_player=fouler,
                         is_home_team=is_home_team
                     )
-                case "flagrant":
+                case "flagrant-1" | "flagrant-2":
                     return FlagrantFoul(
                         play_length=play_length,
                         play_id=play.play_id,
@@ -143,6 +143,15 @@ def convert_to_nba_play(play: Play, game: Game) -> NbaPlay:
                     )
                 case _:
                     raise ValueError(f"Unexpected foul type: {play.type}")
+        case "technical foul":
+            match play.type:
+                case "double technical":
+                    return DoubleTechnicalFoul(
+                        play_length=play_length,
+                        play_id=play.play_id
+                    )
+                case _:
+                    raise ValueError(f"Unexpected technical foul: {play.type}")
 
         case "jump ball":
             did_home_team_win = play.player == play.home
@@ -243,5 +252,10 @@ def convert_to_nba_play(play: Play, game: Game) -> NbaPlay:
                 shot_made=shot_made
             )
 
+        case "":
+            return Unknown(
+                play_length=play_length,
+                play_id=play.play_id
+            )
         case _:
             raise ValueError(f"Unrecognized play type: {event_type}")

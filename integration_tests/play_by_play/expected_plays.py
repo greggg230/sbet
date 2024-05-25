@@ -1,11 +1,12 @@
 from sbet.data.play_by_play.models.transform.field_goal_type import FieldGoalType
-from sbet.data.play_by_play.models.transform.fouls import OffensiveFoul, ShootingFoul, PersonalFoul
+from sbet.data.play_by_play.models.transform.fouls import OffensiveFoul, ShootingFoul, PersonalFoul, FlagrantFoul, \
+    TechnicalFoul, DoubleTechnicalFoul
 from sbet.data.play_by_play.models.transform.player import Player
 from sbet.data.play_by_play.models.transform.plays import (
-    FieldGoalAttempt, PeriodStart, JumpBall, Rebound, Timeout, FreeThrow, Substitution, PeriodEnd
+    FieldGoalAttempt, PeriodStart, JumpBall, Rebound, Timeout, FreeThrow, Substitution, PeriodEnd, Unknown
 )
 from sbet.data.play_by_play.models.transform.turnover import OutOfBoundsTurnover, Steal, OffensiveFoulTurnover, \
-    TravelingTurnover
+    TravelingTurnover, ShotClockViolation
 
 expected_plays = [
     PeriodStart(
@@ -468,5 +469,86 @@ expected_plays = [
         play_id=140,
         rebounding_player=Player("Klay Thompson"),
         is_offensive=False
-    )
+    ),
+    FieldGoalAttempt(play_length=8000, play_id=141, shot_made=True, shooting_player=Player("Klay Thompson"), assisting_player=Player("Jordan Poole"), type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=19000, play_id=142, shot_made=True, shooting_player=Player("De'Anthony Melton"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=15000, play_id=143, shot_made=False, shooting_player=Player("Nemanja Bjelica"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=144, rebounding_player=Player("Desmond Bane"), is_offensive=False),
+    FieldGoalAttempt(play_length=9000, play_id=145, shot_made=True, shooting_player=Player("Jaren Jackson Jr."), assisting_player=Player("Desmond Bane"), type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=16000, play_id=146, shot_made=False, shooting_player=Player("Klay Thompson"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=147, rebounding_player=Player("Jaren Jackson Jr."), is_offensive=False),
+    FieldGoalAttempt(play_length=4000, play_id=148, shot_made=True, shooting_player=Player("Brandon Clarke"), assisting_player=Player("De'Anthony Melton"), type=FieldGoalType.LAYUP, was_fouled=False),
+    Timeout(play_length=0, play_id=149, is_home=True),
+    Substitution(play_length=0, play_id=150, home_team_lineup=frozenset({Player("Kevon Looney"), Player("Jordan Poole"), Player("Draymond Green"), Player("Klay Thompson"), Player("Nemanja Bjelica")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Brandon Clarke"), Player("De'Anthony Melton"), Player("Desmond Bane"), Player("Ziaire Williams")})),
+    Substitution(play_length=0, play_id=151, home_team_lineup=frozenset({Player("Kevon Looney"), Player("Jordan Poole"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Nemanja Bjelica")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Brandon Clarke"), Player("De'Anthony Melton"), Player("Desmond Bane"), Player("Ziaire Williams")})),
+    Substitution(play_length=0, play_id=152, home_team_lineup=frozenset({Player("Kevon Looney"), Player("Jordan Poole"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Stephen Curry")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Brandon Clarke"), Player("De'Anthony Melton"), Player("Desmond Bane"), Player("Ziaire Williams")})),
+    Substitution(play_length=0, play_id=153, home_team_lineup=frozenset({Player("Kevon Looney"), Player("Jordan Poole"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Stephen Curry")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Brandon Clarke"), Player("De'Anthony Melton"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    FieldGoalAttempt(play_length=22000, play_id=154, shot_made=True, shooting_player=Player("Stephen Curry"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=10000, play_id=155, shot_made=False, shooting_player=Player("Desmond Bane"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=156, rebounding_player=Player("Stephen Curry"), is_offensive=False),
+    Steal(play_length=17000, play_id=157, stolen_from=Player("Jordan Poole"), stolen_by=Player("De'Anthony Melton")),
+    FieldGoalAttempt(play_length=6000, play_id=158, shot_made=False, shooting_player=Player("Dillon Brooks"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=159, rebounding_player=Player("Brandon Clarke"), is_offensive=True),
+    FieldGoalAttempt(play_length=8000, play_id=160, shot_made=False, shooting_player=Player("Jaren Jackson Jr."), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=161, rebounding_player=Player("Draymond Green"), is_offensive=False),
+    FieldGoalAttempt(play_length=6000, play_id=162, shot_made=True, shooting_player=Player("Jordan Poole"), assisting_player=None, type=FieldGoalType.LAYUP, was_fouled=True),
+    ShootingFoul(play_length=0, play_id=163, fouling_player=Player("Desmond Bane"), field_goal_type=FieldGoalType.LAYUP, field_goal_made=True),
+    Substitution(play_length=0, play_id=164, home_team_lineup=frozenset({Player("Jordan Poole"), Player("Stephen Curry"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Kevon Looney")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Steven Adams"), Player("Brandon Clarke"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    Substitution(play_length=0, play_id=165, home_team_lineup=frozenset({Player("Jordan Poole"), Player("Stephen Curry"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Kevon Looney")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Steven Adams"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    FreeThrow(play_length=0, play_id=166, shot_made=False),
+    Rebound(play_length=2000, play_id=167, rebounding_player=Player("Desmond Bane"), is_offensive=False),
+    FieldGoalAttempt(play_length=13000, play_id=168, shot_made=True, shooting_player=Player("Dillon Brooks"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=30000, play_id=169, shot_made=False, shooting_player=Player("Jordan Poole"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=1000, play_id=170, rebounding_player=None, is_offensive=True),
+    ShotClockViolation(play_length=0, play_id=171),
+    FieldGoalAttempt(play_length=11000, play_id=172, shot_made=False, shooting_player=Player("Tyus Jones"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=173, rebounding_player=Player("Jordan Poole"), is_offensive=False),
+    Steal(play_length=7000, play_id=174, stolen_from=Player("Andrew Wiggins"), stolen_by=Player("Tyus Jones")),
+    FieldGoalAttempt(play_length=4000, play_id=175, shot_made=False, shooting_player=Player("Dillon Brooks"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=176, rebounding_player=Player("Desmond Bane"), is_offensive=True),
+    FieldGoalAttempt(play_length=11000, play_id=177, shot_made=True, shooting_player=Player("Dillon Brooks"), assisting_player=Player("Steven Adams"), type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Timeout(play_length=1000, play_id=178, is_home=True),
+    Substitution(play_length=0, play_id=179, home_team_lineup=frozenset({Player("Klay Thompson"), Player("Stephen Curry"), Player("Draymond Green"), Player("Andrew Wiggins"), Player("Kevon Looney")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Steven Adams"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    FieldGoalAttempt(play_length=14000, play_id=180, shot_made=False, shooting_player=Player("Stephen Curry"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=181, rebounding_player=Player("Tyus Jones"), is_offensive=False),
+    FieldGoalAttempt(play_length=4000, play_id=182, shot_made=True, shooting_player=Player("Tyus Jones"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=12000, play_id=183, shot_made=False, shooting_player=Player("Stephen Curry"), assisting_player=None, type=FieldGoalType.LAYUP, was_fouled=False),
+    Rebound(play_length=2000, play_id=184, rebounding_player=Player("Steven Adams"), is_offensive=False),
+    FieldGoalAttempt(play_length=7000, play_id=185, shot_made=True, shooting_player=Player("Jaren Jackson Jr."), assisting_player=Player("Tyus Jones"), type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    FieldGoalAttempt(play_length=17000, play_id=186, shot_made=False, shooting_player=Player("Stephen Curry"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=187, rebounding_player=Player("Andrew Wiggins"), is_offensive=True),
+    FieldGoalAttempt(play_length=3000, play_id=188, shot_made=False, shooting_player=Player("Andrew Wiggins"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=189, rebounding_player=Player("Andrew Wiggins"), is_offensive=True),
+    FieldGoalAttempt(play_length=1000, play_id=190, shot_made=False, shooting_player=Player("Andrew Wiggins"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=191, rebounding_player=Player("Tyus Jones"), is_offensive=False),
+    PersonalFoul(play_length=3000, play_id=192, fouling_player=Player("Kevon Looney")),
+    Substitution(play_length=0, play_id=193, home_team_lineup=frozenset({Player("Klay Thompson"), Player("Stephen Curry"), Player("Damion Lee"), Player("Andrew Wiggins"), Player("Kevon Looney")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Steven Adams"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    ShootingFoul(play_length=3000, play_id=194, fouling_player=Player("Andrew Wiggins"), field_goal_type=FieldGoalType.TWO_POINT_SHOT, field_goal_made=False),
+    FreeThrow(play_length=0, play_id=195, shot_made=True),
+    FreeThrow(play_length=0, play_id=196, shot_made=False),
+    Rebound(play_length=1000, play_id=197, rebounding_player=None, is_offensive=False),
+    FieldGoalAttempt(play_length=15000, play_id=198, shot_made=False, shooting_player=Player("Andrew Wiggins"), assisting_player=None, type=FieldGoalType.THREE_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=3000, play_id=199, rebounding_player=Player("Desmond Bane"), is_offensive=False),
+    ShootingFoul(play_length=3000, play_id=200, fouling_player=Player("Damion Lee"), field_goal_type=FieldGoalType.TWO_POINT_SHOT, field_goal_made=False),
+    Timeout(play_length=0, play_id=201, is_home=True),
+    Unknown(play_length=0, play_id=202),
+    Substitution(play_length=0, play_id=203, home_team_lineup=frozenset({Player("Klay Thompson"), Player("Stephen Curry"), Player("Damion Lee"), Player("Andrew Wiggins"), Player("Draymond Green")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Steven Adams"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    Substitution(play_length=0, play_id=204, home_team_lineup=frozenset({Player("Klay Thompson"), Player("Stephen Curry"), Player("Nemanja Bjelica"), Player("Andrew Wiggins"), Player("Draymond Green")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Steven Adams"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    FreeThrow(play_length=0, play_id=205, shot_made=True),
+    FreeThrow(play_length=0, play_id=206, shot_made=True),
+    FieldGoalAttempt(play_length=14000, play_id=207, shot_made=True, shooting_player=Player("Draymond Green"), assisting_player=Player("Stephen Curry"), type=FieldGoalType.LAYUP, was_fouled=False),
+    FieldGoalAttempt(play_length=20000, play_id=208, shot_made=False, shooting_player=Player("Dillon Brooks"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=2000, play_id=209, rebounding_player=Player("Klay Thompson"), is_offensive=False),
+    Steal(play_length=18000, play_id=210, stolen_by=Player("Dillon Brooks"), stolen_from=Player("Draymond Green")),
+    FieldGoalAttempt(play_length=8000, play_id=211, shot_made=False, shooting_player=Player("Dillon Brooks"), assisting_player=None, type=FieldGoalType.TWO_POINT_SHOT, was_fouled=False),
+    Rebound(play_length=1000, play_id=212, rebounding_player=None, is_offensive=False),
+    FlagrantFoul(play_length=0, play_id=213, fouling_player=Player("Dillon Brooks")),
+    DoubleTechnicalFoul(play_length=0, play_id=214),
+    Unknown(play_length=0, play_id=215),
+    FreeThrow(play_length=0, play_id=216, shot_made=True),
+    FreeThrow(play_length=0, play_id=217, shot_made=False),
+    Rebound(play_length=0, play_id=218, rebounding_player=None, is_offensive=True),
+    Substitution(play_length=0, play_id=219, home_team_lineup=frozenset({Player("Klay Thompson"), Player("Stephen Curry"), Player("Nemanja Bjelica"), Player("Andrew Wiggins"), Player("Draymond Green")}), away_team_lineup=frozenset({Player("Jaren Jackson Jr."), Player("Tyus Jones"), Player("Brandon Clarke"), Player("Desmond Bane"), Player("Dillon Brooks")})),
+    OutOfBoundsTurnover(play_length=14000, play_id=220, player=Player("Stephen Curry"))
+
 ]
