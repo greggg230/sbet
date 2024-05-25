@@ -22,7 +22,10 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
             166: ["lineup"],
             205: ["lineup"],
             206: ["lineup"],
-            240: ["lineup"]
+            240: ["lineup"],
+            255: ["lineup"],
+            361: ["lineup"],
+            413: ["lineup"]
         }
 
     def test_integration_play_by_play(self):

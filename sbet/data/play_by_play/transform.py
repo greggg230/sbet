@@ -20,8 +20,11 @@ def parse_play_length(play_length_str: str) -> timedelta:
     return timedelta(hours=time_parts[0], minutes=time_parts[1], seconds=time_parts[2])
 
 
-THREE_POINT_SHOT_TYPES = ["3pt jump shot", "3pt running pull-up jump shot", "3pt pullup jump shot", "3pt step back jump shot"]
-LAYUP_TYPES = ["layup", "cutting layup shot", "driving dunk", "dunk", "cutting finger roll layup shot", "driving layup"]
+THREE_POINT_SHOT_TYPES = [
+    "3pt jump shot", "3pt running pull-up jump shot", "3pt pullup jump shot", "3pt step back jump shot", "3pt running jump shot"]
+LAYUP_TYPES = [
+    "layup", "cutting layup shot", "driving dunk", "dunk", "cutting finger roll layup shot", "driving layup",
+    "driving reverse layup", "cutting dunk shot"]
 TWO_POINT_SHOT_TYPES = [
     "jump shot", "hook shot", "fadeaway jumper", "floating jump shot", "driving floating jump shot", "driving floating bank jump shot"]
 
@@ -52,7 +55,7 @@ def next_play_is_foul(plays: list[Play], play_index: int) -> bool:
 
 
 def find_previous_shot(play_index: int, plays: list[Play]) -> (FieldGoalType, bool):
-    if play_index == 0:
+    if play_index == 0 or plays[play_index].play_length != "0:00:00":
         return None, False
 
     previous_play = plays[play_index - 1]
@@ -100,7 +103,7 @@ def convert_to_nba_play(play: Play, game: Game) -> NbaPlay:
             fouler = Player(play.player)
 
             match play.type:
-                case "personal" | "loose ball":
+                case "personal" | "loose ball" | "personal take":
                     return PersonalFoul(
                         play_length=play_length,
                         play_id=play.play_id,
