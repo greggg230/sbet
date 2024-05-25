@@ -21,7 +21,8 @@ class TestIntegrationPlayByPlay(unittest.TestCase):
             91: ["lineup"],  # The lineup data for this row doesn't seem to take into account the substitutions.
             166: ["lineup"],
             205: ["lineup"],
-            206: ["lineup"]
+            206: ["lineup"],
+            240: ["lineup"]
         }
 
     def test_integration_play_by_play(self):
