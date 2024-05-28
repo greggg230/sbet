@@ -1,13 +1,20 @@
+from dataclasses import dataclass
 from typing import List
 from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
 from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
+
+
+@dataclass
+class PredictorEvaluation:
+    average_profit: float
+    number_of_bets_placed: int
 
 
 def evaluate_bet_probability_predictor(
     predictor: BetProbabilityPredictor,
     opportunities: List[NbaMoneyLineBettingOpportunity],
     threshold: float
-) -> float:
+) -> PredictorEvaluation:
     total_profit = 0.0
     placed_bets = 0
 
@@ -30,7 +37,8 @@ def evaluate_bet_probability_predictor(
             else:
                 total_profit -= 1
 
-    return total_profit / placed_bets if placed_bets > 0 else 0.0
+    average_profit = total_profit / placed_bets if placed_bets > 0 else 0.0
+    return PredictorEvaluation(average_profit=average_profit, number_of_bets_placed=placed_bets)
 
 
 def convert_moneyline_to_probability(moneyline: float) -> float:

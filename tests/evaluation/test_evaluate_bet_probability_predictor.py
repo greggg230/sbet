@@ -1,10 +1,12 @@
 import unittest
+from datetime import date
 from unittest.mock import Mock
-from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
-from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
+
 from sbet.data.historical.models import NbaGame
+from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
 from sbet.data.historical.models import NbaTeam
 from sbet.evaluation.evaluate import evaluate_bet_probability_predictor
+from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
 
 
 class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
@@ -16,7 +18,7 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         # Mock games
         game1 = NbaGame(
             game_id=101,
-            game_date="2024-01-01",
+            game_date=date(2024, 1, 1),
             season="2023-2024",
             game_type="Regular",
             home_team=NbaTeam.LAL,
@@ -26,7 +28,7 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         )
         game2 = NbaGame(
             game_id=102,
-            game_date="2024-01-02",
+            game_date=date(2024, 1, 2),
             season="2023-2024",
             game_type="Regular",
             home_team=NbaTeam.BOS,
@@ -36,7 +38,7 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         )
         game3 = NbaGame(
             game_id=103,
-            game_date="2024-01-03",
+            game_date=date(2024, 1, 3),
             season="2023-2024",
             game_type="Regular",
             home_team=NbaTeam.MIA,
@@ -46,7 +48,7 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         )
         game4 = NbaGame(
             game_id=104,
-            game_date="2024-01-04",
+            game_date=date(2024, 1, 4),
             season="2023-2024",
             game_type="Regular",
             home_team=NbaTeam.NYK,
@@ -56,7 +58,7 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         )
         game5 = NbaGame(
             game_id=105,
-            game_date="2024-01-05",
+            game_date=date(2024, 1, 5),
             season="2023-2024",
             game_type="Regular",
             home_team=NbaTeam.CHI,
@@ -104,7 +106,12 @@ class TestEvaluateBetProbabilityPredictor(unittest.TestCase):
         opportunities = [self.opportunity1, self.opportunity2, self.opportunity3, self.opportunity4, self.opportunity5]
         threshold = 0.05
 
-        average_profit = evaluate_bet_probability_predictor(self.predictor, opportunities, threshold)
+        evaluation = evaluate_bet_probability_predictor(self.predictor, opportunities, threshold)
 
-        # Check average profit calculation
-        self.assertAlmostEqual(average_profit, 0.817, places=3)
+        # Check the evaluation results
+        self.assertAlmostEqual(evaluation.average_profit, 0.817, places=3)
+        self.assertEqual(evaluation.number_of_bets_placed, 4)
+
+
+if __name__ == '__main__':
+    unittest.main()
