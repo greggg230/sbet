@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import List, Dict, Optional
 from sbet.data.historical.models import NbaGame, NbaMoneyLineBettingOpportunity, NbaTeam
 from sbet.data.historical.models import Game, Team, MoneyLineBettingOdds
@@ -21,16 +22,22 @@ def transform_to_nba_games(games: List[Game], teams: List[Team]) -> List[NbaGame
         home_game = pair["home"]
         away_game = pair["away"]
 
-        if home_game and away_game:
+        if home_game and away_game and home_game.game_date:
             home_team_abbreviation = team_id_to_abbreviation.get(home_game.team_id)
             away_team_abbreviation = team_id_to_abbreviation.get(away_game.team_id)
 
             if home_team_abbreviation and away_team_abbreviation:
                 game_type = "Preseason" if "Preseason" in home_game.season_type else "Regular Season" if "Regular" in home_game.season_type else "Playoff"
 
+                try:
+                    game_date = datetime.strptime(home_game.game_date, '%Y-%m-%d').date()
+                except ValueError:
+                    # Skip if the date format is incorrect
+                    continue
+
                 nba_game = NbaGame(
                     game_id=home_game.game_id,
-                    game_date=home_game.game_date,
+                    game_date=game_date,
                     season=home_game.season,
                     game_type=game_type,
                     home_team=NbaTeam[home_team_abbreviation],
