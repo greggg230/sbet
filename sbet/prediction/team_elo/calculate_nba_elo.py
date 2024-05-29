@@ -1,6 +1,4 @@
-# sbet/prediction/team_elo/calculate_nba_elo.py
-
-from typing import List, Dict
+from typing import List, Dict, Optional
 from sbet.data.historical.models.transform.nba_team import NbaTeam
 from sbet.prediction.team_elo.elo import calculate_elo
 from sbet.prediction.team_elo.models.nba_game_outcome import NbaGameOutcome
@@ -9,8 +7,15 @@ from sbet.prediction.team_elo.models.nba_game_outcome import NbaGameOutcome
 INITIAL_ELO = 1500.0
 
 
-def calculate_nba_elo(game_outcomes: List[NbaGameOutcome], k: int = 32) -> Dict[NbaTeam, float]:
-    team_elos = {team: INITIAL_ELO for team in NbaTeam}
+def calculate_nba_elo(
+    game_outcomes: List[NbaGameOutcome],
+    k: int = 32,
+    current_elo: Optional[Dict[NbaTeam, float]] = None
+) -> Dict[NbaTeam, float]:
+    if current_elo is None:
+        current_elo = {}
+
+    team_elos = {team: current_elo.get(team, INITIAL_ELO) for team in NbaTeam}
 
     for outcome in game_outcomes:
         home_team = outcome.home_team

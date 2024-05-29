@@ -27,18 +27,18 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
         self.nba_games = transform_to_nba_games(self.games, self.teams)
 
     def test_team_elo_probability_predictor_yearly(self):
-        threshold = 0.4  # Threshold for evaluating the strategy
+        threshold = 0.5  # Threshold for evaluating the strategy
         start_year = 2010
         end_year = 2018
-        k_value = 200
+        k_value = 50
 
         total_profit = 0
         total_bets_placed = 0
         num_years = end_year - start_year + 1
 
         for year in range(start_year, end_year + 1):
-            start_date = date(year, 10, 20)
-            end_date = date(year, 12, 31)
+            start_date = date(year - 1, 10, 20)
+            end_date = date(year + 1, 3, 1)
             filtered_games = [
                 game for game in self.nba_games
                 if start_date <= game.game_date <= end_date
@@ -53,13 +53,21 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
                 for game in filtered_games
             ]
 
-            start_betting_date = date(year + 1, 1, 1)
-            end_betting_date = date(year + 1, 4, 13)
+            start_betting_date = end_date
+            end_betting_date = date(year + 1, 7, 13)
             nba_money_line_betting_opportunities = transform_to_nba_money_line_betting_opportunities(self.betting_odds, self.nba_games)
             betting_opportunities = [
                 opportunity for opportunity in nba_money_line_betting_opportunities
                 if start_betting_date <= opportunity.game.game_date <= end_betting_date
             ]
+
+            uniq = {}
+
+            for opportunity in betting_opportunities:
+                if opportunity.game not in uniq or opportunity.price > uniq[opportunity.game].price:
+                    uniq[opportunity.game] = opportunity
+
+            betting_opportunities = [opportunity for opportunity in uniq.values()]
 
             # Instantiate the TeamEloProbabilityPredictor
             predictor = TeamEloProbabilityPredictor(game_outcomes, k=k_value)

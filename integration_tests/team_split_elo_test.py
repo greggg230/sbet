@@ -32,14 +32,14 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
         threshold = 0.5  # Threshold for evaluating the strategy
         start_year = 2010
         end_year = 2018
-        k_value = 100
+        k_value = 200
 
         total_profit = 0
         total_bets_placed = 0
 
         for year in range(start_year, end_year + 1):
             start_date = date(year, 10, 20)
-            end_date = date(year, 12, 31)
+            end_date = date(year + 1, 4, 15)
             filtered_games = [
                 game for game in self.nba_games
                 if start_date <= game.game_date <= end_date
@@ -54,8 +54,8 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
                 for game in filtered_games
             ]
 
-            start_betting_date = date(year + 1, 1, 1)
-            end_betting_date = date(year + 1, 4, 13)
+            start_betting_date = date(year + 1, 4, 16)
+            end_betting_date = date(year + 1, 7, 13)
             nba_money_line_betting_opportunities = transform_to_nba_money_line_betting_opportunities(self.betting_odds, self.nba_games)
             betting_opportunities = [
                 opportunity for opportunity in nba_money_line_betting_opportunities
