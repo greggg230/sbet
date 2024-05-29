@@ -7,3 +7,5 @@ class GameContext:
     away_team_elo: float
     away_team_rest_days: int
     home_team_rest_days: int
+    home_team_games_played_this_season: int
+    away_team_games_played_this_season: int
