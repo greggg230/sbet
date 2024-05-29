@@ -35,7 +35,7 @@ class TestTransformToNbaMoneyLineBettingOpportunitiesMissingGame(unittest.TestCa
     def test_transform_to_nba_money_line_betting_opportunities_missing_game(self):
         nba_games = transform_to_nba_games(self.games, self.teams)
 
-        with self.assertRaises(ValueError) as context:
-            transform_to_nba_money_line_betting_opportunities(self.invalid_betting_odds, nba_games)
-
-        self.assertEqual(str(context.exception), "Game ID 99999999 not found in game data.")
+        self.assertEqual(
+            len(transform_to_nba_money_line_betting_opportunities(self.invalid_betting_odds, nba_games)),
+            0
+        )

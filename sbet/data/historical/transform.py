@@ -60,7 +60,7 @@ def transform_to_nba_money_line_betting_opportunities(
     for odds in money_line_betting_odds:
         game = game_id_to_nba_game.get(odds.game_id)
         if game is None:
-            raise ValueError(f"Game ID {odds.game_id} not found in game data.")
+            continue
 
         opportunity_home = NbaMoneyLineBettingOpportunity(
             game=game,
