@@ -5,6 +5,8 @@ from datetime import datetime, date
 from sbet.data.historical.parsing import read_teams, read_games, read_money_line_betting_odds
 from sbet.data.historical.transform import transform_to_nba_games, transform_to_nba_money_line_betting_opportunities
 from sbet.evaluation.evaluate import evaluate_bet_probability_predictor, PredictorEvaluation
+from sbet.prediction.team_elo.home_away_split_team_elo_probability_predictor import \
+    HomeAwaySplitTeamEloProbabilityPredictor
 from sbet.prediction.team_elo.models.nba_game_outcome import NbaGameOutcome
 from sbet.prediction.team_elo.predictor import TeamEloProbabilityPredictor
 
@@ -27,14 +29,13 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
         self.nba_games = transform_to_nba_games(self.games, self.teams)
 
     def test_team_elo_probability_predictor_yearly(self):
-        threshold = 0.4  # Threshold for evaluating the strategy
+        threshold = 0.5  # Threshold for evaluating the strategy
         start_year = 2010
         end_year = 2018
-        k_value = 200
+        k_value = 100
 
         total_profit = 0
         total_bets_placed = 0
-        num_years = end_year - start_year + 1
 
         for year in range(start_year, end_year + 1):
             start_date = date(year, 10, 20)
@@ -62,7 +63,7 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
             ]
 
             # Instantiate the TeamEloProbabilityPredictor
-            predictor = TeamEloProbabilityPredictor(game_outcomes, k=k_value)
+            predictor = HomeAwaySplitTeamEloProbabilityPredictor(game_outcomes, k=k_value)
 
             # Evaluate the predictor using evaluate_bet_probability_predictor function
             evaluation = evaluate_bet_probability_predictor(predictor, betting_opportunities, threshold)
