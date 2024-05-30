@@ -7,7 +7,7 @@ from sbet.data.historical.transform import transform_to_nba_games, transform_to_
 from sbet.evaluation.evaluate import evaluate_bet_probability_predictor, PredictorEvaluation
 from sbet.prediction.team_elo.home_away_split_team_elo_probability_predictor import \
     HomeAwaySplitTeamEloProbabilityPredictor
-from sbet.prediction.team_elo.models.nba_game_outcome import NbaGameOutcome
+from sbet.prediction.team_elo.models.game_outcome import NbaGameOutcome
 from sbet.prediction.team_elo.predictor import TeamEloProbabilityPredictor
 
 

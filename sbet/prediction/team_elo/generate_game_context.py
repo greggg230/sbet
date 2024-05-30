@@ -1,15 +1,15 @@
-from typing import List, Dict
+from datetime import date
+from typing import List, Dict, Optional
 
-from sbet.data.historical.models.transform.nba_game import NbaGame
-from sbet.data.historical.models.transform.nba_team import NbaTeam
-from sbet.prediction.team_elo.calculate_nba_elo import calculate_nba_elo
+from sbet.data.historical.models.transform.game import Game
+from sbet.prediction.team_elo.calculate_sports_elo import calculate_sports_elo
 from sbet.prediction.team_elo.models.game_context import GameContext
-from sbet.prediction.team_elo.models.nba_game_outcome import NbaGameOutcome
+from sbet.prediction.team_elo.models.game_outcome import GameOutcome
 
 INITIAL_ELO = 1500.0
 
 
-def generate_game_context_for_games(games: List[NbaGame]) -> Dict[NbaGame, GameContext]:
+def generate_game_context_for_games(games: List[Game], k: int = 32) -> Dict[Game, GameContext]:
     # Sort games by date
     games.sort(key=lambda game: game.game_date)
 
@@ -18,16 +18,30 @@ def generate_game_context_for_games(games: List[NbaGame]) -> Dict[NbaGame, GameC
 
     for season in seasons:
         season_games = [game for game in games if game.season == season]
-        team_elos = {team: INITIAL_ELO for team in NbaTeam}
-        games_played = {team: 0 for team in NbaTeam}
-        previous_game_dates = {team: None for team in NbaTeam}
+        team_elos: dict[str, float] = {}
+        games_played: dict[str, int] = {}
+        previous_game_dates: dict[str, Optional[date]] = {}
 
         for game in season_games:
+            if game.home_team not in previous_game_dates:
+                previous_game_dates[game.home_team] = None
+            if game.away_team not in previous_game_dates:
+                previous_game_dates[game.away_team] = None
             # Calculate rest days
             home_rest_days = (game.game_date - previous_game_dates[game.home_team]).days if previous_game_dates[
                 game.home_team] else 0
             away_rest_days = (game.game_date - previous_game_dates[game.away_team]).days if previous_game_dates[
                 game.away_team] else 0
+
+            if game.home_team not in games_played:
+                games_played[game.home_team] = 0
+            if game.away_team not in games_played:
+                games_played[game.away_team] = 0
+
+            if game.home_team not in team_elos:
+                team_elos[game.home_team] = INITIAL_ELO
+            if game.away_team not in team_elos:
+                team_elos[game.away_team] = INITIAL_ELO
 
             # Generate GameContext
             game_context = GameContext(
@@ -48,11 +62,11 @@ def generate_game_context_for_games(games: List[NbaGame]) -> Dict[NbaGame, GameC
             previous_game_dates[game.home_team] = game.game_date
             previous_game_dates[game.away_team] = game.game_date
 
-            game_outcomes = [NbaGameOutcome(
+            game_outcomes = [GameOutcome(
                 home_team=g.home_team,
                 away_team=g.away_team,
                 did_home_team_win=g.home_score > g.away_score
             ) for g in season_games if g.game_date <= game.game_date]
-            team_elos = calculate_nba_elo(game_outcomes)
+            team_elos = calculate_sports_elo(game_outcomes, k=k)
 
     return game_contexts

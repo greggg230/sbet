@@ -1,8 +1,8 @@
 import unittest
 from datetime import date
-from sbet.data.historical.models import NbaMoneyLineBettingOpportunity
-from sbet.data.historical.models.transform.nba_team import NbaTeam
-from sbet.data.historical.models.transform import NbaGame
+
+from sbet.data.historical.models.transform.game import Game
+from sbet.data.historical.models.transform.money_line_betting_opportunity import MoneyLineBettingOpportunity
 from sbet.prediction.team_elo.predictor import TeamEloProbabilityPredictor
 from sbet.prediction.team_elo.generate_game_context import GameContext
 
@@ -12,13 +12,13 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
     def setUp(self):
         # Mock game contexts
         self.game_contexts = {
-            NbaGame(
+            Game(
                 game_id=1,
                 game_date=date(2024, 1, 1),
                 season="2023-2024",
                 game_type="Regular",
-                home_team=NbaTeam.LAL,
-                away_team=NbaTeam.GSW,
+                home_team="LAL",
+                away_team="GSW",
                 home_score=100,
                 away_score=90
             ): GameContext(
@@ -29,13 +29,13 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
                 home_team_games_played_this_season=10,
                 away_team_games_played_this_season=10
             ),
-            NbaGame(
+            Game(
                 game_id=2,
                 game_date=date(2024, 1, 2),
                 season="2023-2024",
                 game_type="Regular",
-                home_team=NbaTeam.BOS,
-                away_team=NbaTeam.BKN,
+                home_team="BOS",
+                away_team="BKN",
                 home_score=95,
                 away_score=105
             ): GameContext(
@@ -49,14 +49,14 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
         }
 
         # Mock opportunities
-        self.opportunity1 = NbaMoneyLineBettingOpportunity(
-            game=NbaGame(
+        self.opportunity1 = MoneyLineBettingOpportunity(
+            game=Game(
                 game_id=1,
                 game_date=date(2024, 1, 1),
                 season="2023-2024",
                 game_type="Regular",
-                home_team=NbaTeam.LAL,
-                away_team=NbaTeam.GSW,
+                home_team="LAL",
+                away_team="GSW",
                 home_score=100,
                 away_score=90
             ),
@@ -64,14 +64,14 @@ class TestTeamEloProbabilityPredictor(unittest.TestCase):
             bet_on_home_team=True,
             price=150
         )
-        self.opportunity2 = NbaMoneyLineBettingOpportunity(
-            game=NbaGame(
+        self.opportunity2 = MoneyLineBettingOpportunity(
+            game=Game(
                 game_id=2,
                 game_date=date(2024, 1, 2),
                 season="2023-2024",
                 game_type="Regular",
-                home_team=NbaTeam.BOS,
-                away_team=NbaTeam.BKN,
+                home_team="BOS",
+                away_team="BKN",
                 home_score=95,
                 away_score=105
             ),

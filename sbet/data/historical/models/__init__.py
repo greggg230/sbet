@@ -1,5 +1,5 @@
 from .csv import Team, Game, MoneyLineBettingOdds
-from .transform import NbaTeam, NbaGame, NbaMoneyLineBettingOpportunity
+from .transform import NbaTeam, NbaGame
 
 __all__ = [
     "NbaTeam",
@@ -7,5 +7,4 @@ __all__ = [
     "Game",
     "MoneyLineBettingOdds",
     "NbaGame",
-    "NbaMoneyLineBettingOpportunity"
 ]
