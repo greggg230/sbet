@@ -1,3 +1,4 @@
+import math
 from datetime import date
 from typing import List, Dict, Optional
 
@@ -63,10 +64,13 @@ def generate_game_context_for_games(games: List[Game], k: int = 32) -> Dict[Game
             previous_game_dates[game.away_team] = game.game_date
 
             game_outcomes = [GameOutcome(
-                home_team=g.home_team,
-                away_team=g.away_team,
-                did_home_team_win=g.home_score > g.away_score
-            ) for g in season_games if g.game_date <= game.game_date]
-            team_elos = calculate_sports_elo(game_outcomes, k=k)
+                home_team=game.home_team,
+                away_team=game.away_team,
+                did_home_team_win=game.home_score > game.away_score
+            )]
+
+            effective_k = math.ceil(k * (1 - (games_played[game.home_team] / 200)))
+
+            team_elos = calculate_sports_elo(game_outcomes, k=effective_k, current_elo=team_elos)
 
     return game_contexts

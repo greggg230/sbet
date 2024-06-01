@@ -28,11 +28,18 @@ class PredictorEvaluationDetail:
 
 
 @dataclass(frozen=True)
+class MonthDetails:
+    average_profit: float
+    number_of_bets_placed: int
+
+
+@dataclass(frozen=True)
 class PredictorEvaluation:
     average_profit: float
     number_of_bets_placed: int
     number_of_bets_skipped: int
     details: frozenset[PredictorEvaluationDetail]
+    details_by_month: dict[int, MonthDetails]
 
 
 def evaluate_bet_probability_predictor(
@@ -47,6 +54,7 @@ def evaluate_bet_probability_predictor(
     bets_skipped = 0
 
     details: List[PredictorEvaluationDetail] = []
+    bets_by_month: dict[int, List[float]] = {i: [] for i in range(1, 13)}
 
     for opportunity in opportunities:
         win_probability = predictor.calculate_probability_of_bet_win(opportunity)
@@ -72,6 +80,7 @@ def evaluate_bet_probability_predictor(
             else:
                 net_winnings = -1
                 total_profit -= 1
+            bets_by_month[opportunity.game.game_date.month].append(net_winnings)
         else:
             net_winnings = 0
             bets_skipped += 1
@@ -95,11 +104,20 @@ def evaluate_bet_probability_predictor(
             ))
 
     average_profit = total_profit / placed_bets if placed_bets > 0 else 0.0
+
+    details_by_month = {}
+    for month, month_bets in bets_by_month.items():
+        details_by_month[month] = MonthDetails(
+            average_profit=(sum(month_bets) / len(month_bets)) if len(month_bets) else 0,
+            number_of_bets_placed=len(month_bets)
+        )
+
     return PredictorEvaluation(
         average_profit=average_profit,
         number_of_bets_placed=placed_bets,
         number_of_bets_skipped=bets_skipped,
-        details=frozenset(details)
+        details=frozenset(details),
+        details_by_month=details_by_month
     )
 
 

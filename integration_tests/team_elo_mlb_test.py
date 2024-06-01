@@ -30,12 +30,12 @@ class TestTeamEloProbabilityPredictorYearly(unittest.TestCase):
         ]
 
         # Generate game contexts for all games upfront
-        self.game_contexts = generate_game_context_for_games(self.mlb_games, 250)
+        self.game_contexts = generate_game_context_for_games(self.mlb_games, 15)
 
         self.betting_opportunities: frozendict[Game, GameBettingOpportunities] = extracted_data.money_line_data
 
     def test_team_elo_probability_predictor_yearly(self):
-        threshold = 0.05  # Example threshold
+        threshold = 0.1  # Example threshold
         total_profit = 0
         year_profits: Dict[int, float] = {}
 
@@ -48,7 +48,7 @@ class TestTeamEloProbabilityPredictorYearly(unittest.TestCase):
                 if game.season == season_str
             ]
 
-            start_betting_date = datetime.strptime(f'{year}-04-15', '%Y-%m-%d').date()
+            start_betting_date = datetime.strptime(f'{year}-05-15', '%Y-%m-%d').date()
 
             betting_opportunities = [
                 self.betting_opportunities[game] for game in season_games if game in self.betting_opportunities and game.game_date >= start_betting_date
@@ -59,7 +59,13 @@ class TestTeamEloProbabilityPredictorYearly(unittest.TestCase):
             predictor = TeamEloProbabilityPredictor(self.game_contexts)
 
             # Evaluate the predictor using evaluate_bet_probability_predictor function
-            evaluation_result = evaluate_bet_probability_predictor(predictor, all_opportunities, threshold, self.game_contexts)
+            evaluation_result = evaluate_bet_probability_predictor(
+                predictor,
+                all_opportunities,
+                threshold,
+                create_report=True,
+                contexts=frozendict(self.game_contexts)
+            )
             year_profit = evaluation_result.average_profit
             print(f"Year: {year}: {evaluation_result.number_of_bets_placed} / {evaluation_result.number_of_bets_skipped}")
 

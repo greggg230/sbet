@@ -14,5 +14,5 @@ class TeamEloProbabilityPredictor(BetProbabilityPredictor):
         game_context = self.game_contexts[opportunity.game]
         home_team_elo = game_context.home_team_elo
         away_team_elo = game_context.away_team_elo
-        expected_home_win_prob = 1 / (1 + 10 ** ((away_team_elo - home_team_elo) / 400))
+        expected_home_win_prob = .969 / (1 + 10 ** ((away_team_elo - home_team_elo) / 400))
         return expected_home_win_prob if opportunity.bet_on_home_team else 1 - expected_home_win_prob

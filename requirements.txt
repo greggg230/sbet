@@ -1,3 +1,4 @@
 pandas
 mypy
 frozendict
+scikit-learn

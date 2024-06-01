@@ -11,12 +11,7 @@ from sbet.data.historical.models.transform.money_line_betting_opportunity import
 
 
 class ScottfreeHistoricalBetDataExtractor(HistoricalBetDataExtractor):
-    csv_file_path: str
-
-    def __init__(self, csv_file_path: str):
-        self.csv_file_path = csv_file_path
-
-    def extract(self) -> HistoricalBetData:
+    def _do_extraction(self) -> HistoricalBetData:
         # Read CSV data
         rows = read_scottfree_game_csv(self.csv_file_path)
 
