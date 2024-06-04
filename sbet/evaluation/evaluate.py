@@ -45,7 +45,6 @@ class PredictorEvaluation:
 def evaluate_bet_probability_predictor(
     predictor: BetProbabilityPredictor,
     opportunities: List[MoneyLineBettingOpportunity],
-    threshold: float,
     create_report: bool = False,
     contexts: frozendict[Game, GameContext] = frozendict({})
 ) -> PredictorEvaluation:
@@ -57,15 +56,12 @@ def evaluate_bet_probability_predictor(
     bets_by_month: dict[int, List[float]] = {i: [] for i in range(1, 13)}
 
     for opportunity in opportunities:
-        win_probability = predictor.calculate_probability_of_bet_win(opportunity)
-        implied_probability = convert_moneyline_to_probability(opportunity.price)
-
         if opportunity.bet_on_home_team:
             bet_won = opportunity.game.home_score > opportunity.game.away_score
         else:
             bet_won = opportunity.game.home_score < opportunity.game.away_score
 
-        bet_taken = win_probability - implied_probability > threshold
+        bet_taken = predictor.select_opportunity(opportunity)
         net_winnings: float
 
         if bet_taken:
@@ -87,6 +83,8 @@ def evaluate_bet_probability_predictor(
 
         if create_report:
             context = contexts[opportunity.game]
+            win_probability = predictor.calculate_probability_of_bet_win(opportunity)
+            implied_probability = convert_moneyline_to_probability(opportunity.price)
             details.append(PredictorEvaluationDetail(
                 date=opportunity.game.game_date,
                 season=opportunity.game.season,

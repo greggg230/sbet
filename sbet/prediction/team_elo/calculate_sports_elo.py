@@ -9,13 +9,18 @@ INITIAL_ELO = 1500.0
 
 def calculate_sports_elo(
     game_outcomes: List[GameOutcome],
-    k: int = 32,
-    current_elo: Optional[Dict[str, float]] = None
+    k: float = 32,
+    current_elo: Optional[Dict[str, float]] = None,
+    margin_of_victory_gradient: float = 0,
+    home_bias: float = 0.5
 ) -> Dict[str, float]:
     if current_elo is None:
         current_elo = {}
 
     team_elos = {}
+
+    if current_elo is not None:
+        team_elos.update(current_elo)
 
     for outcome in game_outcomes:
         home_team = outcome.home_team
@@ -29,12 +34,21 @@ def calculate_sports_elo(
         home_team_elo = team_elos[home_team]
         away_team_elo = team_elos[away_team]
 
-        if outcome.did_home_team_win:
-            new_home_elo, new_away_elo = calculate_elo(home_team_elo, away_team_elo, k)
-        else:
-            new_away_elo, new_home_elo = calculate_elo(away_team_elo, home_team_elo, k)
+        margin_of_victory = abs(outcome.home_score - outcome.away_score)
 
-        team_elos[home_team] = new_home_elo
-        team_elos[away_team] = new_away_elo
+        effective_k: float
+        if margin_of_victory_gradient > 0 and margin_of_victory < margin_of_victory_gradient:
+            effective_k = k / 3
+        else:
+            effective_k = k
+
+        if margin_of_victory > 0:
+            if outcome.did_home_team_win:
+                new_home_elo, new_away_elo = calculate_elo(home_team_elo, away_team_elo, effective_k, winner_bias=home_bias)
+            else:
+                new_away_elo, new_home_elo = calculate_elo(away_team_elo, home_team_elo, effective_k, winner_bias=home_bias)
+
+            team_elos[home_team] = new_home_elo
+            team_elos[away_team] = new_away_elo
 
     return team_elos
