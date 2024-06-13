@@ -11,7 +11,7 @@ def calculate_sports_elo(
     game_outcomes: List[GameOutcome],
     k: float = 32,
     current_elo: Optional[Dict[str, float]] = None,
-    margin_of_victory_gradient: float = 0,
+    margin_of_victory_gradient: float = 1,
     home_bias: float = 0.5
 ) -> Dict[str, float]:
     if current_elo is None:
@@ -36,11 +36,7 @@ def calculate_sports_elo(
 
         margin_of_victory = abs(outcome.home_score - outcome.away_score)
 
-        effective_k: float
-        if margin_of_victory_gradient > 0 and margin_of_victory < margin_of_victory_gradient:
-            effective_k = k / 3
-        else:
-            effective_k = k
+        effective_k = min(margin_of_victory_gradient * k * margin_of_victory, k)
 
         if margin_of_victory > 0:
             if outcome.did_home_team_win:

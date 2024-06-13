@@ -4,7 +4,9 @@ from typing import List
 
 from frozendict import frozendict
 
+from sbet.data.historical.models.transform.bet_type import BetType
 from sbet.data.historical.models.transform.game import Game
+from sbet.data.historical.models.transform.game_result import GameResult
 from sbet.data.historical.models.transform.money_line_betting_opportunity import MoneyLineBettingOpportunity
 from sbet.prediction.bet_probability_predictor import BetProbabilityPredictor
 from sbet.prediction.team_elo.models.game_context import GameContext
@@ -18,7 +20,7 @@ class PredictorEvaluationDetail:
     away_team: str
     home_elo: float
     away_elo: float
-    is_betting_on_home: bool
+    bet_type: BetType
     expected_probability_of_win: float
     bet_price: float
     bet_taken: bool
@@ -56,10 +58,12 @@ def evaluate_bet_probability_predictor(
     bets_by_month: dict[int, List[float]] = {i: [] for i in range(1, 13)}
 
     for opportunity in opportunities:
-        if opportunity.bet_on_home_team:
-            bet_won = opportunity.game.home_score > opportunity.game.away_score
+        if opportunity.bet_type == BetType.HOME_WIN:
+            bet_won = opportunity.game.result == GameResult.HOME_WINS
+        elif opportunity.bet_type == BetType.AWAY_WIN:
+            bet_won = opportunity.game.result == GameResult.AWAY_WINS
         else:
-            bet_won = opportunity.game.home_score < opportunity.game.away_score
+            bet_won = opportunity.game.result == GameResult.DRAW
 
         bet_taken = predictor.select_opportunity(opportunity)
         net_winnings: float
@@ -92,7 +96,7 @@ def evaluate_bet_probability_predictor(
                 away_team=opportunity.game.away_team,
                 home_elo=context.home_team_elo,
                 away_elo=context.away_team_elo,
-                is_betting_on_home=opportunity.bet_on_home_team,
+                bet_type=opportunity.bet_type,
                 expected_probability_of_win=win_probability,
                 bet_price=opportunity.price,
                 bet_taken=bet_taken,

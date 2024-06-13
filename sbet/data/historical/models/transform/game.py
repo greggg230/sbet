@@ -1,6 +1,8 @@
 from dataclasses import dataclass
 from datetime import date
 
+from sbet.data.historical.models.transform.game_result import GameResult
+
 
 @dataclass(frozen=True)
 class Game:
@@ -12,3 +14,4 @@ class Game:
     away_team: str
     home_score: int
     away_score: int
+    result: GameResult

@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from sbet.data.historical.models.transform import NbaGame
+from sbet.data.historical.models.transform.bet_type import BetType
 from sbet.data.historical.models.transform.game import Game
 
 
@@ -7,5 +8,5 @@ from sbet.data.historical.models.transform.game import Game
 class MoneyLineBettingOpportunity:
     game: Game
     book_name: str
-    bet_on_home_team: bool
+    bet_type: BetType
     price: float

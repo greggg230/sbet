@@ -81,7 +81,8 @@ def generate_game_context_for_games_recursive(
         k: float = 32,
         recursions: int = 1,
         margin_of_victory_gradient: float = 0,
-        k_decay_factor: float = 570
+        k_decay_factor: float = 570,
+        home_bias: float = 0.5
 ) -> Dict[Game, GameContext]:
     # Sort games by date
     games.sort(key=lambda game: game.game_date)
@@ -96,8 +97,6 @@ def generate_game_context_for_games_recursive(
         previous_game_dates: dict[str, Optional[date]] = {}
 
         processed_outcomes: List[GameOutcome] = []
-
-        has_done_february_reset = False
 
         current_date: Optional[date] = None
         days_into_season = 0
@@ -116,7 +115,13 @@ def generate_game_context_for_games_recursive(
                 days_into_season += 1
                 # Re-run Elo again for all previous games, using the new Elo ratings.
                 for i in range(recursions):
-                    team_elos = calculate_sports_elo(processed_outcomes, k=effective_k, current_elo=team_elos, margin_of_victory_gradient=margin_of_victory_gradient)
+                    team_elos = calculate_sports_elo(
+                        processed_outcomes,
+                        k=effective_k,
+                        current_elo=team_elos,
+                        margin_of_victory_gradient=margin_of_victory_gradient,
+                        home_bias=home_bias
+                    )
                 current_date = game.game_date
 
             if game.home_team not in previous_game_dates:
@@ -169,6 +174,157 @@ def generate_game_context_for_games_recursive(
 
             processed_outcomes.append(game_outcome)
 
-            team_elos = calculate_sports_elo([game_outcome], k=effective_k, current_elo=team_elos, margin_of_victory_gradient=margin_of_victory_gradient)
+            team_elos = calculate_sports_elo(
+                [game_outcome],
+                k=effective_k,
+                current_elo=team_elos,
+                margin_of_victory_gradient=margin_of_victory_gradient,
+                home_bias=home_bias
+            )
+
+    return game_contexts
+
+
+def generate_elos(
+        games: List[Game],
+        iterations: int,
+        k: float,
+        home_bias: float,
+        margin_of_victory_gradient: float,
+        k_decay_factor: float = 0
+) -> Dict[str, float]:
+    sorted_games = sorted(games, key=lambda game: game.game_date)
+    teams = set([game.home_team for game in sorted_games] + [game.away_team for game in sorted_games])
+    elos = {team: INITIAL_ELO for team in teams}
+
+    unique_dates = sorted(list(set([game.game_date for game in sorted_games])))
+
+    for i in range(iterations):
+        day_counter = 0
+        for udate in unique_dates:
+            if k_decay_factor == 0:
+                effective_k = k
+            else:
+                discount = max(1 - (day_counter / k_decay_factor), 1 / k_decay_factor)
+                effective_k = k * discount
+
+            todays_games = [game for game in sorted_games if game.game_date == udate]
+
+            outcomes = [
+                GameOutcome(
+                    home_team=game.home_team,
+                    away_team=game.away_team,
+                    home_score=game.home_score,
+                    away_score=game.away_score,
+                    did_home_team_win=game.home_score > game.away_score
+                )
+                for game in todays_games
+            ]
+            elos = calculate_sports_elo(
+                outcomes,
+                effective_k,
+                current_elo=elos,
+                margin_of_victory_gradient=margin_of_victory_gradient,
+                home_bias=home_bias
+            )
+
+            day_counter += 1
+
+    return elos
+
+
+def generate_elos_v2(
+        games: List[Game],
+        iterations: int,
+        k: float,
+        home_bias: float,
+        margin_of_victory_gradient: float,
+        k_decay_factor: float = 0
+) -> Dict[str, float]:
+    sorted_games = sorted(games, key=lambda game: game.game_date)
+    teams = set([game.home_team for game in sorted_games] + [game.away_team for game in sorted_games])
+    elos = {team: INITIAL_ELO for team in teams}
+
+    unique_dates = sorted(list(set([game.game_date for game in sorted_games])))
+
+    for i in range(iterations):
+        day_counter = 0
+        for udate in unique_dates:
+            if k_decay_factor == 0:
+                effective_k = k
+            else:
+                discount = max(1 - (day_counter / k_decay_factor), 1 / k_decay_factor)
+                effective_k = k * discount
+
+            todays_games = [game for game in sorted_games if game.game_date == udate]
+
+            outcomes = [
+                GameOutcome(
+                    home_team=game.home_team,
+                    away_team=game.away_team,
+                    home_score=game.home_score,
+                    away_score=game.away_score,
+                    did_home_team_win=game.home_score > game.away_score
+                )
+                for game in todays_games
+            ]
+            elos = calculate_sports_elo(
+                outcomes,
+                effective_k,
+                current_elo=elos,
+                margin_of_victory_gradient=margin_of_victory_gradient,
+                home_bias=home_bias
+            )
+
+            day_counter += 1
+
+    return elos
+
+
+def generate_game_context_for_games_recursive_regenerate(
+        games: List[Game],
+        k: float = 32,
+        recursions: int = 1,
+        margin_of_victory_gradient: float = 0,
+        home_bias: float = 0.5,
+        k_decay_factor: float = 0
+) -> Dict[Game, GameContext]:
+    # Sort games by date
+    games.sort(key=lambda game: game.game_date)
+
+    game_contexts = {}
+    seasons = set(game.season for game in games)
+    team_elos: dict[str, float] = {}
+
+    for season in seasons:
+        season_games = [game for game in games if game.season == season]
+
+        current_date = None
+
+        for game in season_games:
+            if current_date is None or current_date < game.game_date:
+                current_date = game.game_date
+                previous_games = [sgame for sgame in season_games if sgame.game_date < game.game_date]
+
+                team_elos = generate_elos(
+                    previous_games,
+                    recursions,
+                    k,
+                    home_bias=home_bias,
+                    margin_of_victory_gradient=margin_of_victory_gradient,
+                    k_decay_factor=k_decay_factor
+                )
+
+            # Generate GameContext
+            game_context = GameContext(
+                home_team_elo=team_elos.get(game.home_team, INITIAL_ELO),
+                away_team_elo=team_elos.get(game.away_team, INITIAL_ELO),
+                home_team_rest_days=0,
+                away_team_rest_days=0,
+                home_team_games_played_this_season=0,
+                away_team_games_played_this_season=0
+            )
+
+            game_contexts[game] = game_context
 
     return game_contexts

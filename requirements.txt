@@ -2,3 +2,5 @@ pandas
 mypy
 frozendict
 scikit-learn
+requests
+selenium

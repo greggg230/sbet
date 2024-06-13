@@ -8,3 +8,4 @@ from sbet.data.historical.models.transform.money_line_betting_opportunity import
 class GameBettingOpportunities:
     home: Optional[MoneyLineBettingOpportunity]
     away: Optional[MoneyLineBettingOpportunity]
+    draw: Optional[MoneyLineBettingOpportunity]
